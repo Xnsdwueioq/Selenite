@@ -19,7 +19,7 @@
 		B715CCEE2F2A5C2F00D8EF4D /* Exceptions for "Selenite" folder in "Selenite" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Resources/Info.plist,
 			);
 			target = B715CCE02F2A5C2D00D8EF4D /* Selenite */;
 		};
