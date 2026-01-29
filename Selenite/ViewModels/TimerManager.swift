@@ -14,6 +14,7 @@ final class TimerManager {
   // ===============LOGIC===============
   var activeSession: Session?
   var selectedDuration: TimeInterval? = 10 // потом планируется забирать из настроек пользователя
+  var timerStatus: TimerStatus = .paused
   var isSolid: Bool {
     if activeSession?.targetDuration != nil && activeSession?.intervals.count == 1 {
       true
@@ -21,7 +22,7 @@ final class TimerManager {
       false
     }
   }
-    
+  
   // initialize new session with `targetDuration` as `selectedDuration`
   // append to it `TimeInterval` instance
   // insert with modelContext and call `startPulse`
@@ -31,16 +32,20 @@ final class TimerManager {
     
     newSession.intervals.append(firstInterval)
     activeSession = newSession
-
+    
     modelContext.insert(newSession)
     
+    timerStatus = .running
     startPulse()
   }
   
-  // call `stopPulse` and set `sessionType` to `activeSession`
+  // call `pause` and set `sessionType` to `activeSession`
+  // dissolve `activeSession`
   func endSession() {
-    stopPulse()
+    timerStatus = .running
+    pause()
     activeSession?.sessionType = isSolid ? .solid : .fragmented
+    activeSession = nil
   }
   
   private var timer: Timer?
@@ -50,6 +55,7 @@ final class TimerManager {
   private func resume() {
     let nextInterval = SessionInterval(startTime: Date())
     activeSession?.intervals.append(nextInterval)
+    timerStatus = .running
     startPulse()
   }
   
@@ -58,6 +64,7 @@ final class TimerManager {
     if let lastInterval = activeSession?.intervals.last, lastInterval.endTime == nil {
       lastInterval.endTime = Date()
     }
+    timerStatus = .paused
     stopPulse()
   }
   
@@ -75,6 +82,10 @@ final class TimerManager {
   private func stopPulse() {
     timer?.invalidate()
     timer = nil
+  }
+  
+  enum TimerStatus: String {
+    case running, paused
   }
   
   // ===============VIEW===============
@@ -98,5 +109,17 @@ final class TimerManager {
     let minutes = totalSeconds / 60
     
     return String(format: "%02d:%02d", minutes, seconds)
+  }
+  
+  func playButtonAction(modelContext: ModelContext) {
+    guard activeSession != nil else {
+      startSession(modelContext: modelContext)
+      return
+    }
+    
+    switch timerStatus {
+    case .running: pause()
+    case .paused: resume()
+    }
   }
 }

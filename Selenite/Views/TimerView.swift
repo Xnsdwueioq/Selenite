@@ -16,8 +16,8 @@ struct TimerView: View {
     VStack {
       Text(timerManager.displayCount())
         .id(timerManager.pulse)
-      Button("StartNewSession", systemImage: "play") {
-        timerManager.startSession(modelContext: modelContext)
+      Button("Button", systemImage: "play") {
+        timerManager.playButtonAction(modelContext: modelContext)
       }
     }
     .onChange(of: timerManager.pulse) {
