@@ -20,9 +20,6 @@ struct TimerView: View {
         timerManager.playButtonAction(modelContext: modelContext)
       }
     }
-    .onChange(of: timerManager.pulse) {
-      print(timerManager.activeSession?.sessionDuration as Any)
-    }
   }
 }
 

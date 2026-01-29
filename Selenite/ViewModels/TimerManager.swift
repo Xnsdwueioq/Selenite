@@ -42,7 +42,7 @@ final class TimerManager {
   // call `pause` and set `sessionType` to `activeSession`
   // dissolve `activeSession`
   func endSession() {
-    timerStatus = .running
+    timerStatus = .paused
     pause()
     activeSession?.sessionType = isSolid ? .solid : .fragmented
     activeSession = nil
