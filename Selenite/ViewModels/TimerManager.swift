@@ -91,6 +91,15 @@ final class TimerManager {
   }
   
   // ===============VIEW===============
+  func clearDatabase(modelContext: ModelContext) {
+      if activeSession != nil {
+          endSession()
+      }
+      try? modelContext.delete(model: Session.self)
+      try? modelContext.save()
+      activeSession = nil
+  }
+  
   func displayCount() -> String {
     remainingTimeString()
   }
@@ -114,8 +123,11 @@ final class TimerManager {
   }
   
   func playButtonAction(modelContext: ModelContext) {
-    guard activeSession != nil else {
+    guard let session = activeSession else {
       startSession(modelContext: modelContext)
+      return
+    }
+    guard !session.isCompleted else {
       return
     }
     

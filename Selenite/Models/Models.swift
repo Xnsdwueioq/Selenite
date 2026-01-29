@@ -60,8 +60,8 @@ final class Session {
     return totalDuration
   }
   var isCompleted: Bool {
-    guard targetDuration != nil else { return false }
-    return sessionDuration >= targetDuration! ? true : false
+    guard let target = targetDuration else { return false }
+    return sessionDuration >= target
   }
   
   init(title: String = "", sessionType: SessionType = SessionType.active, targetDuration: TimeInterval? = nil, intervals: [SessionInterval] = []) {
