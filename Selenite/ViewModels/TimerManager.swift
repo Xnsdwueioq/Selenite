@@ -42,10 +42,12 @@ final class TimerManager {
   // call `pause` and set `sessionType` to `activeSession`
   // dissolve `activeSession`
   func endSession() {
-    timerStatus = .paused
     pause()
+    timerStatus = .paused
     activeSession?.sessionType = isSolid ? .solid : .fragmented
-    activeSession = nil
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+      self?.activeSession = nil
+    }
   }
   
   private var timer: Timer?
@@ -94,7 +96,7 @@ final class TimerManager {
   }
   
   private func remainingSeconds() -> TimeInterval {
-    guard let session = activeSession else { return 0 }
+    guard let session = activeSession else { return selectedDuration ?? 0 }
     
     let target = session.targetDuration ?? 0
     let current = session.sessionDuration
