@@ -12,7 +12,7 @@ import SwiftData
 struct SeleniteApp: App {
   var body: some Scene {
     WindowGroup {
-      ContentView()
+      TimerView()
     }
     .modelContainer(for: [Session.self, SessionInterval.self])
   }

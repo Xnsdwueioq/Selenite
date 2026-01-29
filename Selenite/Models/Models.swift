@@ -36,7 +36,8 @@ final class SessionInterval {
 final class Session {
   var title: String
   var sessionType: SessionType
-  
+  var targetDuration: TimeInterval?
+
   @Relationship(deleteRule: .cascade)
   var intervals: [SessionInterval]
   
@@ -58,9 +59,14 @@ final class Session {
     
     return totalDuration
   }
+  var isCompleted: Bool {
+    guard targetDuration != nil else { return false }
+    return sessionDuration >= targetDuration! ? true : false
+  }
   
-  init(title: String = "", sessionType: SessionType = SessionType.active, intervals: [SessionInterval] = []) {
+  init(title: String = "", sessionType: SessionType = SessionType.active, targetDuration: TimeInterval? = nil, intervals: [SessionInterval] = []) {
     self.title = title
+    self.targetDuration = targetDuration
     self.sessionType = sessionType
     self.intervals = intervals
   }
