@@ -9,8 +9,81 @@ import SwiftUI
 import SwiftData
 
 struct SettingsTabView: View {
+  @State private var settingsVM = SettingsViewModel(settingsManager: SettingsManager.shared)
+  
   var body: some View {
-    
+    NavigationStack {
+      List {
+        Section("Сессия") {
+          SliderParameterView(parameterName: "Продолжительность сессии", value: $settingsVM.sessionDuration)
+          VStack {
+            HStack {
+              Text("Количество сессий")
+              Spacer()
+              Text(String(Int(settingsVM.sessionCount)))
+                .foregroundStyle(.secondary)
+            }
+            Slider(
+              value: $settingsVM.sessionCount,
+              in: 1...10,
+              step: 1,
+              label: {
+                Text("Количество сесий")
+              },
+              currentValueLabel: {
+                Text(String(settingsVM.sessionCount))
+              }
+            )
+          }
+          ToggleParameterView(parameterName: "Автоматический старт сессии", value: $settingsVM.sessionAutostart)
+        }
+        
+        Section("Перерывы") {
+          ToggleParameterView(parameterName: "Отключить перерывы", value: $settingsVM.areBreaksDisabled)
+          if !settingsVM.areBreaksDisabled {
+            SliderParameterView(parameterName: "Короткий перерыв", value: $settingsVM.shortBreakDuration)
+            SliderParameterView(parameterName: "Длинный перерыв", value: $settingsVM.longBreakDuration)
+            ToggleParameterView(parameterName: "Автоматический старт перерыва", value: $settingsVM.breakAutostart)
+          }
+        }
+      }
+      .animation(.snappy, value: settingsVM.areBreaksDisabled)
+      .navigationTitle("Настройки")
+    }
+  }
+}
+
+struct SliderParameterView: View {
+  var parameterName: String
+  @Binding var value: Double
+  
+  var body: some View {
+    VStack {
+      HStack {
+        Text(parameterName)
+        Spacer()
+        Text(String(Int(value)))
+          .foregroundStyle(.secondary)
+      }
+      Slider(
+        value: $value,
+        in: 1...100,
+        label: {
+          Text(parameterName)
+        },
+        currentValueLabel: {
+          Text(String(value))
+        }
+      )
+    }
+  }
+}
+struct ToggleParameterView: View {
+  var parameterName: String
+  @Binding var value: Bool
+  
+  var body: some View {
+    Toggle(parameterName, isOn: $value)
   }
 }
 
