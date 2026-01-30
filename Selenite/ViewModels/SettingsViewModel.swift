@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 @Observable
 final class SettingsViewModel {
@@ -45,7 +46,8 @@ final class SettingsViewModel {
     settingsManager.longBreakDuration = Int(longBreakDuration)
     settingsManager.breakAutostart = breakAutostart
     
-    print("DEBUG: Settings saved successfully!")
+    // DEBUG
+    NSLog("~\(UIDevice.current.name) sheduleSave -> saveAll")
   }
   
   private func sheduleSave() {

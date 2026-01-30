@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 
 @Observable
@@ -53,7 +54,8 @@ final class SettingsManager {
   
   private init() {
     loadFromCloud()
-    
+    // DEBUG
+    NSLog("~\(UIDevice.current.name) init -> loadFromCloud")
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(cloudDataChanged),
@@ -87,7 +89,8 @@ final class SettingsManager {
     } else if let boolValue = value as? Bool, store.bool(forKey: key) != boolValue {
       store.set(boolValue, forKey: key)
     }
-    
+    // DEBUG
+    NSLog("~\(UIDevice.current.name) saveToCloud \(value)")
     store.synchronize()
   }
   
@@ -101,6 +104,8 @@ final class SettingsManager {
   @objc private func cloudDataChanged(notification: Notification) {
     DispatchQueue.main.async { [weak self] in
       self?.loadFromCloud()
+      // DEBUG
+      NSLog("~\(UIDevice.current.name) cloudDataChanged[Notification] -> loadFromCloud")
     }
   }
   
