@@ -90,6 +90,6 @@ struct ToggleParameterView: View {
 #Preview {
   SettingsTabView()
     .modelContainer(for: [Session.self, SessionInterval.self])
-    .environment(TimerManager())
+    .environment(TimerManager(settingsManager: SettingsManager.shared))
     .tint(.purple.mix(with: .red, by: 0.6))
 }

@@ -12,8 +12,9 @@ import SwiftUI
 @Observable
 final class TimerManager {
   // ===============LOGIC===============
+  var settingsManager: SettingsManager
   var activeSession: Session?
-  var selectedDuration: TimeInterval? = 10 // потом планируется забирать из настроек пользователя
+  var selectedDuration: TimeInterval? // потом планируется забирать из настроек пользователя
   var timerStatus: TimerStatus = .paused
   var isSolid: Bool {
     if activeSession?.targetDuration != nil && activeSession?.intervals.count == 1 {
@@ -21,6 +22,10 @@ final class TimerManager {
     } else {
       false
     }
+  }
+  
+  init(settingsManager: SettingsManager) {
+    self.settingsManager = settingsManager
   }
   
   // initialize new session with `targetDuration` as `selectedDuration`

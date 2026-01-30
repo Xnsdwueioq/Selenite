@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-  @State private var timerManager = TimerManager()
+  @State private var timerManager = TimerManager(settingsManager: SettingsManager.shared)
   
   var body: some View {
     TabView {

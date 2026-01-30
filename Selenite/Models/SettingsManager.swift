@@ -99,10 +99,10 @@ final class SettingsManager {
   }
   
   @objc private func cloudDataChanged(notification: Notification) {
-          DispatchQueue.main.async { [weak self] in
-              self?.loadFromCloud()
-          }
-      }
+    DispatchQueue.main.async { [weak self] in
+      self?.loadFromCloud()
+    }
+  }
   
   private enum Keys {
     static let sessionDuration = "sessionDuration"
