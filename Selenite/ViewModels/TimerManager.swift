@@ -46,12 +46,12 @@ final class TimerManager {
     return total >= target
   }
   
-  private var calculateSessionType: SessionType? {
+  private var calculateSessionType: SessionState? {
     guard let session = activeSession else { return nil }
     
     switch session.intervals.count {
-    case 1: return SessionType.solid
-    default: return SessionType.fragmented
+    case 1: return SessionState.solid
+    default: return SessionState.fragmented
     }
   }
   
@@ -75,8 +75,8 @@ final class TimerManager {
     closeCurrentInterval()
     state = .finished
     
-    guard let type = calculateSessionType else { return }
-    activeSession?.sessionType = type
+    guard let state = calculateSessionType else { return }
+    activeSession?.sessionState = state
     
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: { [weak self] in
       self?.endSession()
@@ -100,7 +100,7 @@ final class TimerManager {
   // MARK: - Session & Intervals
   
   func createSession(modelContext: ModelContext) {
-    let newSession = Session(title: "Selenite", sessionType: .active, targetDuration: TimeInterval(settingsManager.sessionDuration))
+    let newSession = Session(title: "Selenite", sessionState: .active, targetDuration: TimeInterval(settingsManager.sessionDuration))
     activeSession = newSession
     
     modelContext.insert(newSession)

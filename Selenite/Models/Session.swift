@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 
-enum SessionType: String, Codable {
+enum SessionState: String, Codable {
   case active
   case solid
   case fragmented
@@ -35,7 +35,7 @@ final class SessionInterval {
 @Model
 final class Session {
   var title: String
-  var sessionType: SessionType
+  var sessionState: SessionState
   var targetDuration: TimeInterval?
 
   @Relationship(deleteRule: .cascade)
@@ -64,10 +64,10 @@ final class Session {
     return sessionDuration >= target
   }
   
-  init(title: String = "", sessionType: SessionType = SessionType.active, targetDuration: TimeInterval? = nil, intervals: [SessionInterval] = []) {
+  init(title: String = "", sessionState: SessionState = SessionState.active, targetDuration: TimeInterval? = nil, intervals: [SessionInterval] = []) {
     self.title = title
     self.targetDuration = targetDuration
-    self.sessionType = sessionType
+    self.sessionState = sessionState
     self.intervals = intervals
   }
 }
