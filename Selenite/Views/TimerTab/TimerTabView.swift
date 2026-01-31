@@ -19,12 +19,13 @@ struct TimerTabView: View {
         .font(.system(size: 82))
         .fontWeight(.medium)
       
-      Button(action: { timerManager.playButton(modelContext: modelContext) }) {
-        Image(systemName: "play.fill")
+      Button(action: { timerManager.playButtonAction(modelContext: modelContext) }) {
+        Image(systemName: timerManager.playButtonSystemImage())
+          .animation(nil, value: timerManager.state)
       }
-        .buttonStyle(.glassProminent)
-        .buttonBorderShape(.circle)
-        .controlSize(.large)
+      .buttonStyle(.glassProminent)
+      .buttonBorderShape(.circle)
+      .controlSize(.extraLarge)
     }
   }
 }

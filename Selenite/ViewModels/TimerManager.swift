@@ -35,21 +35,6 @@ final class TimerManager {
     return formatter
   }()
   
-  // MARK: - Controls
-  
-  func playButton(modelContext: ModelContext) {
-    switch state {
-    case .idle:
-      startTimer(modelContext: modelContext)
-    case .active:
-      pauseTimer()
-    case .paused:
-      resumeTimer()
-    case .finished:
-      print("finished")
-    }
-  }
-  
   // MARK: - State Variables
   
   private var isCompleted: Bool? {
@@ -176,4 +161,31 @@ final class TimerManager {
     
     return max(0, total).rounded(.up)
   }
+  
+  func playButtonAction(modelContext: ModelContext) {
+    switch state {
+    case .idle:
+      startTimer(modelContext: modelContext)
+    case .active:
+      pauseTimer()
+    case .paused:
+      resumeTimer()
+    case .finished:
+      return
+    }
+  }
+  
+  func playButtonSystemImage() -> String {
+    switch state {
+    case .idle:
+      "play.fill"
+    case .active:
+      "pause.fill"
+    case .paused:
+      "play.fill"
+    case .finished:
+      "play.fill"
+    }
+  }
+  
 }
