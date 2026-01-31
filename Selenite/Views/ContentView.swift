@@ -29,6 +29,10 @@ struct ContentView: View {
 }
 
 #Preview {
-  ContentView()
-    .modelContainer(for: [Session.self, SessionInterval.self])
+  let config = ModelConfiguration(isStoredInMemoryOnly: true)
+      let container = try! ModelContainer(for: Session.self, SessionInterval.self, configurations: config)
+      
+      return ContentView()
+          .modelContainer(container)
+          .environment(TimerManager(settingsManager: SettingsManager.shared))
 }

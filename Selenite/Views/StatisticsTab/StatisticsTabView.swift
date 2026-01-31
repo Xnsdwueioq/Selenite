@@ -20,7 +20,7 @@ struct StatisticsTabView: View {
           VStack(alignment: .leading) {
             Text(session.title.isEmpty ? "Без названия" : session.title)
               .font(.headline)
-            Text(session.sessionType.rawValue)
+            Text(session.sessionState.rawValue)
             
             HStack {
               Text("Интервалов: \(session.intervals.count)")
