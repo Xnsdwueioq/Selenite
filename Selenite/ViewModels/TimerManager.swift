@@ -22,6 +22,12 @@ enum TimerType {
   case longRest
 }
 
+enum WorkSessionState {
+  case notStarted
+  case didStarted
+  case finished
+}
+
 @Observable
 final class TimerManager {
   private let settingsManager: SettingsManager
@@ -42,7 +48,7 @@ final class TimerManager {
     return formatter
   }()
   
-  // MARK: - Session State Variables
+  // MARK: - Session State Computed Properties
   
   private var isCompleted: Bool? {
     guard let session = activeSession, let target = session.targetDuration else { return nil }
@@ -62,81 +68,34 @@ final class TimerManager {
     }
   }
   
-  // MARK: - Breaks Logic
-  
-  private var breaksCount: Int = 0
-  
-  private var nextBreakAreLong: Bool {
-    return (breaksCount + 1) == settingsManager.sessionCount
-  }
-  
-  func increaseBreaksCount() {
-    breaksCount += 1
-  }
-  
-  func resetBreaksCount() {
-    breaksCount = 0
-  }
-  
-  func updateType() {
-    switch type {
-    case .work:
-      type = nextBreakAreLong ? .longRest : .shortRest
-      
-    case .shortRest, .longRest:
-      if type == .shortRest {
-        increaseBreaksCount()
-      } else {
-        resetBreaksCount()
-      }
-      type = .work
-    }
-  }
-  
-  // MARK: - Timer Control
-  
-  var pulse: Bool = false
-  
-  private var timer: Timer?
-  
-  func startTimer(modelContext: ModelContext) {
-    createSession(modelContext: modelContext)
-    appendOpenInterval()
-    state = .active
-    startPulse()
-  }
-  
-  func timerEnded() {
-    guard state != .finished else { return }
-    
-    stopPulse()
-    closeCurrentInterval()
-    state = .finished
-    
-    guard let state = calculateSessionType else { return }
-    activeSession?.sessionState = state
-    
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: { [weak self] in
-      self?.endSession()
-      self?.state = .idle
-      self?.updateType()
-    })
-  }
-  
-  
-  func resumeTimer() {
-    appendOpenInterval()
-    state = .active
-    startPulse()
-  }
-  
-  func pauseTimer() {
-    closeCurrentInterval()
-    state = .paused
-    stopPulse()
+  private var totalNumberOfSessions: Int {
+    settingsManager.sessionDuration
   }
   
   // MARK: - Session
+  
+  private var sessionCount = 0
+  private var workSessionState: WorkSessionState = .notStarted
+  
+  func getSessionsTotalNumber() -> Int {
+    return settingsManager.sessionCount
+  }
+  
+  func getCurrentSessionNumber() -> Int {
+    return sessionCount
+  }
+  
+  func getWorkSessionState() -> WorkSessionState {
+    return workSessionState
+  }
+  
+  func increaseSessionCount() {
+    sessionCount += 1
+  }
+  
+  func resetSessionCount() {
+    sessionCount = 0
+  }
   
   func createSession(modelContext: ModelContext) {
     let restTitle = "Перерыв"
@@ -177,6 +136,88 @@ final class TimerManager {
   
   func closeCurrentInterval() {
     activeSession?.intervals.last?.endTime = Date()
+  }
+  
+  // MARK: - Breaks Logic
+  
+  private var breaksCount: Int = 0
+  
+  private var nextBreakAreLong: Bool {
+    return (breaksCount + 1) == settingsManager.sessionCount
+  }
+  
+  func increaseBreaksCount() {
+    breaksCount += 1
+  }
+  
+  func resetBreaksCount() {
+    breaksCount = 0
+  }
+  
+  func updateType() {
+    switch type {
+    case .work:
+      type = nextBreakAreLong ? .longRest : .shortRest
+      
+    case .shortRest, .longRest:
+      if type == .shortRest {
+        increaseBreaksCount()
+      } else {
+        resetBreaksCount()
+        resetSessionCount()
+      }
+      type = .work
+    }
+  }
+  
+  // MARK: - Timer Control
+  
+  var pulse: Bool = false
+  
+  private var timer: Timer?
+  
+  func startTimer(modelContext: ModelContext) {
+    createSession(modelContext: modelContext)
+    appendOpenInterval()
+    state = .active
+    if type == .work {
+      workSessionState = .didStarted
+      increaseSessionCount()
+    }
+    startPulse()
+  }
+  
+  func timerEnded() {
+    guard state != .finished else { return }
+    
+    stopPulse()
+    closeCurrentInterval()
+    state = .finished
+    
+    guard let state = calculateSessionType else { return }
+    activeSession?.sessionState = state
+    
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: { [weak self] in
+      self?.endSession()
+      self?.state = .idle
+      if self?.type == .work {
+        self?.workSessionState = .finished
+      }
+      self?.updateType()
+    })
+  }
+  
+  
+  func resumeTimer() {
+    appendOpenInterval()
+    state = .active
+    startPulse()
+  }
+  
+  func pauseTimer() {
+    closeCurrentInterval()
+    state = .paused
+    stopPulse()
   }
   
   // MARK: - Pulsing Control
