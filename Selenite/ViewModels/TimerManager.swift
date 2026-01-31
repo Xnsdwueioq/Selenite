@@ -9,136 +9,171 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+enum TimerState {
+  case idle
+  case active
+  case paused
+  case finished
+}
+
 @Observable
 final class TimerManager {
-  // ===============LOGIC===============
-  var settingsManager: SettingsManager
-  var activeSession: Session?
-  var selectedDuration: TimeInterval? // потом планируется забирать из настроек пользователя
-  var timerStatus: TimerStatus = .paused
-  var isSolid: Bool {
-    if activeSession?.targetDuration != nil && activeSession?.intervals.count == 1 {
-      true
-    } else {
-      false
-    }
-  }
+  private let settingsManager: SettingsManager
   
-  init(settingsManager: SettingsManager) {
+  var state: TimerState = .idle
+  var activeSession: Session?
+  
+  init(settingsManager: SettingsManager = .shared) {
     self.settingsManager = settingsManager
   }
   
-  // initialize new session with `targetDuration` as `selectedDuration`
-  // append to it `TimeInterval` instance
-  // insert with modelContext and call `startPulse`
-  func startSession(modelContext: ModelContext) {
-    let newSession = Session(title: "Selenite", targetDuration: selectedDuration)
-    let firstInterval = SessionInterval(startTime: Date())
-    
-    newSession.intervals.append(firstInterval)
-    activeSession = newSession
-    
-    modelContext.insert(newSession)
-    
-    timerStatus = .running
-    startPulse()
-  }
   
-  // call `pause` and set `sessionType` to `activeSession`
-  // dissolve `activeSession`
-  func endSession() {
-    pause()
-    timerStatus = .paused
-    activeSession?.sessionType = isSolid ? .solid : .fragmented
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-      self?.activeSession = nil
+  private static let timeFormatter: DateComponentsFormatter = {
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = [.minute, .second]
+    formatter.zeroFormattingBehavior = .pad
+    return formatter
+  }()
+  
+  // MARK: - Controls
+  
+  func playButton(modelContext: ModelContext) {
+    switch state {
+    case .idle:
+      startTimer(modelContext: modelContext)
+    case .active:
+      pauseTimer()
+    case .paused:
+      resumeTimer()
+    case .finished:
+      print("finished")
     }
   }
   
-  private var timer: Timer?
+  // MARK: - State Variables
+  
+  private var isCompleted: Bool? {
+    guard let session = activeSession, let target = session.targetDuration else { return nil }
+    
+    let total = session.intervals.reduce(into: 0) { total, interval in
+      total += interval.duration
+    }
+    return total >= target
+  }
+  
+  private var calculateSessionType: SessionType? {
+    guard let session = activeSession else { return nil }
+    
+    switch session.intervals.count {
+    case 1: return SessionType.solid
+    default: return SessionType.fragmented
+    }
+  }
+  
+  // MARK: - Timer Control
+  
   var pulse: Bool = false
   
-  // start pulsing and add new interval with current start time
-  private func resume() {
-    let nextInterval = SessionInterval(startTime: Date())
-    activeSession?.intervals.append(nextInterval)
-    timerStatus = .running
+  private var timer: Timer?
+  
+  func startTimer(modelContext: ModelContext) {
+    createSession(modelContext: modelContext)
+    appendOpenInterval()
+    state = .active
     startPulse()
   }
   
-  // stop pulsing and if last interval continues, end its with current date
-  private func pause() {
-    if let lastInterval = activeSession?.intervals.last, lastInterval.endTime == nil {
-      lastInterval.endTime = Date()
-    }
-    timerStatus = .paused
+  func timerEnded() {
+    guard state != .finished else { return }
+    
     stopPulse()
-  }
-  
-  // if there is `activeSession`, initialize `timer`, which pulsing every second
-  // call `endSession` if `activeSession` is completed
-  private func startPulse() {
-    timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-      guard let self = self, let session = self.activeSession else { return }
-      self.pulse.toggle()
-      if session.isCompleted { self.endSession() }
+    closeCurrentInterval()
+    state = .finished
+    
+    guard let type = calculateSessionType else { return }
+    activeSession?.sessionType = type
+    
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: { [weak self] in
+      self?.endSession()
+      self?.state = .idle
     })
   }
   
-  // invalidate and dissolve `timer`
-  private func stopPulse() {
+  
+  func resumeTimer() {
+    appendOpenInterval()
+    state = .active
+    startPulse()
+  }
+  
+  func pauseTimer() {
+    closeCurrentInterval()
+    state = .paused
+    stopPulse()
+  }
+  
+  // MARK: - Session & Intervals
+  
+  func createSession(modelContext: ModelContext) {
+    let newSession = Session(title: "Selenite", sessionType: .active, targetDuration: TimeInterval(settingsManager.sessionDuration))
+    activeSession = newSession
+    
+    modelContext.insert(newSession)
+  }
+  
+  func endSession() {
+    activeSession = nil
+  }
+  
+  func appendOpenInterval() {
+    activeSession?.intervals.append(SessionInterval(startTime: Date()))
+  }
+  
+  func closeCurrentInterval() {
+    activeSession?.intervals.last?.endTime = Date()
+  }
+  
+  // MARK: - Pulsing Control
+  
+  func startPulse() {
+    timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
+      guard let self = self, let isCompleted = isCompleted else { return }
+      
+      // DEBUG
+      print("---PULSE---")
+      for interval in activeSession?.intervals ?? [] {
+        print(interval.startTime, interval.endTime ?? "nil")
+      }
+      
+      self.pulse.toggle()
+      
+      if isCompleted {
+        timerEnded()
+      }
+    })
+  }
+  
+  func stopPulse() {
     timer?.invalidate()
     timer = nil
   }
   
-  enum TimerStatus: String {
-    case running, paused
+  // MARK: - View
+  
+  func remainingTime() -> String {
+    let time = remainingTimeInterval()
+    
+    return Self.timeFormatter.string(from: time) ?? "00:00"
   }
   
-  // ===============VIEW===============
-  func clearDatabase(modelContext: ModelContext) {
-      if activeSession != nil {
-          endSession()
-      }
-      try? modelContext.delete(model: Session.self)
-      try? modelContext.save()
-      activeSession = nil
-  }
-  
-  func displayCount() -> String {
-    remainingTimeString()
-  }
-  
-  private func remainingSeconds() -> TimeInterval {
-    guard let session = activeSession else { return selectedDuration ?? 0 }
+  func remainingTimeInterval() -> TimeInterval {
+    guard let session = activeSession else { return TimeInterval(settingsManager.sessionDuration) }
     
-    let target = session.targetDuration ?? 0
-    let current = session.sessionDuration
+    let targetDuration = session.targetDuration ?? 0
+    let sessionDuration = session.sessionDuration
     
-    return max(target - current, 0)
-  }
-  
-  private func remainingTimeString() -> String {
-    let totalSeconds: Int = Int(remainingSeconds().rounded(.up))
+    let total = targetDuration - sessionDuration
     
-    let seconds = totalSeconds % 60
-    let minutes = totalSeconds / 60
-    
-    return String(format: "%02d:%02d", minutes, seconds)
-  }
-  
-  func playButtonAction(modelContext: ModelContext) {
-    guard let session = activeSession else {
-      startSession(modelContext: modelContext)
-      return
-    }
-    guard !session.isCompleted else {
-      return
-    }
-    
-    switch timerStatus {
-    case .running: pause()
-    case .paused: resume()
-    }
+    return max(0, total).rounded(.up)
   }
 }

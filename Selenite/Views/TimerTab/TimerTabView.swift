@@ -14,12 +14,12 @@ struct TimerTabView: View {
   
   var body: some View {
     VStack(spacing: 5) {
-      Text(timerManager.displayCount())
+      Text(timerManager.remainingTime())
         .id(timerManager.pulse)
         .font(.system(size: 82))
         .fontWeight(.medium)
       
-      Button(action: { timerManager.playButtonAction(modelContext: modelContext) }) {
+      Button(action: { timerManager.playButton(modelContext: modelContext) }) {
         Image(systemName: "play.fill")
       }
         .buttonStyle(.glassProminent)

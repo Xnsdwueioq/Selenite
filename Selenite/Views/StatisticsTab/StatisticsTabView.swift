@@ -42,13 +42,31 @@ struct StatisticsTabView: View {
       }
       .toolbar {
         ToolbarItem(placement: .topBarLeading, content: {
-          Button(action: { timerManager.clearDatabase(modelContext: modelContext) }) {
+          Button(action: {
+            clearDatabase(modelContext: modelContext)
+          }) {
             Image(systemName: "trash")
           }
         })
       }
     }
   }
+}
+
+@MainActor
+func clearDatabase(modelContext: ModelContext) {
+    let context = modelContext // ваш context
+    do {
+        // Удаляет все записи типа MyModel
+        try context.delete(model: Session.self)
+        // Если моделей несколько, нужно повторить для каждой
+        // try context.delete(model: OtherModel.self)
+        
+        try context.save()
+        print("База очищена")
+    } catch {
+        print("Ошибка при очистке: \(error)")
+    }
 }
 
 #Preview {
