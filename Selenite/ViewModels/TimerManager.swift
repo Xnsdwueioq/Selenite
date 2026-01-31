@@ -256,7 +256,7 @@ final class TimerManager {
     case .paused:
       "play.fill"
     case .finished:
-      "play.fill"
+      "pause.fill"
     }
   }
 }
