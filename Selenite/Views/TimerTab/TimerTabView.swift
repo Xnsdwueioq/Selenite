@@ -16,7 +16,9 @@ struct TimerTabView: View {
     let _ = timerManager.pulse
     VStack(spacing: 5) {
       // RESTART BUTTON
-      Button(action: { timerManager.cancelTime(cancelType: .toStart, modelContext: modelContext) }) {
+      Button(action: {
+        timerManager.resetButtonAction(modelContext: modelContext)
+      }) {
         Image(systemName: "arrow.counterclockwise.circle.fill")
       }
       .buttonStyle(.glassProminent)
@@ -29,26 +31,34 @@ struct TimerTabView: View {
         .fontWeight(.medium)
       
       HStack {
-        Button(action: { timerManager.cancelTime(cancelType: .toPrevious, modelContext: modelContext) }) {
+        // PREV BUTTON
+        Button(action: {
+          timerManager.previousButtonAction(modelContext: modelContext)
+        }) {
           Image(systemName: "chevron.left")
         }
         
         // PLAY/PAUSE BUTTON
-        Button(action: { timerManager.playButtonAction(modelContext: modelContext) }) {
+        Button(action: {
+          timerManager.playButtonAction(modelContext: modelContext)
+        }) {
           Image(systemName: timerManager.playButtonSystemImage())
-            .animation(.none, value: timerManager.state)
+            .animation(.none, value: timerManager.periodState)
         }
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.circle)
         .controlSize(.extraLarge)
         
-        Button(action: { timerManager.skipTime() }) {
+        // NEXT BUTTON
+        Button(action: {
+          timerManager.nextButtonAction()
+        }) {
           Image(systemName: "chevron.right")
         }
       }
       
       // INDICATORS
-      SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), workSessionState: timerManager.getWorkSessionState())
+      SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
     }
   }
 }
@@ -56,7 +66,7 @@ struct TimerTabView: View {
 
 #Preview {
   TimerTabView()
-    .modelContainer(for: [Session.self, SessionInterval.self])
+    .modelContainer(for: [Period.self, PeriodInterval.self])
     .environment(TimerManager(settingsManager: SettingsManager.shared))
     .tint(.purple.mix(with: .red, by: 0.6))
 }

@@ -10,7 +10,7 @@ import SwiftUI
 struct SessionProgressView: View {
   let total: Int
   let current: Int
-  let workSessionState: WorkSessionState
+  let sessionIndicator: SessionIndicator
   
   private let sideLength: CGFloat = 25
   
@@ -26,12 +26,12 @@ struct SessionProgressView: View {
   
   func color(for index: Int) -> Color {
     if index < current { return .purple }
-    else if (index == current) && (workSessionState == .finished) { return .purple }
-    else if (index == current) && (workSessionState == .didStarted) { return .purple.opacity(0.4) }
+    else if (index == current) && (sessionIndicator == .finished) { return .purple }
+    else if (index == current) && (sessionIndicator == .didStarted) { return .purple.opacity(0.3) }
     else { return .gray.opacity(0.2) }
   }
 }
 
 #Preview {
-  SessionProgressView(total: 5, current: 3, workSessionState: .didStarted)
+  SessionProgressView(total: 5, current: 3, sessionIndicator: .didStarted)
 }

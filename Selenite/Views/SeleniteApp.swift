@@ -14,6 +14,6 @@ struct SeleniteApp: App {
     WindowGroup {
       ContentView()
     }
-    .modelContainer(for: [Session.self, SessionInterval.self])
+    .modelContainer(for: [Period.self, PeriodInterval.self])
   }
 }

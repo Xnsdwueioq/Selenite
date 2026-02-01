@@ -30,7 +30,7 @@ struct ContentView: View {
 
 #Preview {
   let config = ModelConfiguration(isStoredInMemoryOnly: true)
-      let container = try! ModelContainer(for: Session.self, SessionInterval.self, configurations: config)
+      let container = try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
       
       return ContentView()
           .modelContainer(container)

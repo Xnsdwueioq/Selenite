@@ -1,5 +1,5 @@
 //
-//  Models.swift
+//  Period.swift
 //  Selenite
 //
 //  Created by Eyhciurmrn Zmpodackrl on 28.01.2026.
@@ -9,14 +9,14 @@ import Foundation
 import SwiftData
 
 
-enum SessionState: String, Codable {
-  case active
+enum FragmentedType: String, Codable {
+  case undetermined
   case solid
   case fragmented
 }
 
 @Model
-final class SessionInterval {
+final class PeriodInterval {
   var startTime: Date
   var endTime: Date?
   var calendarEventID: String?
@@ -33,41 +33,53 @@ final class SessionInterval {
 }
 
 @Model
-final class Session {
+final class Period {
   var title: String
-  var sessionState: SessionState
+  var fragmentedType: FragmentedType
   var targetDuration: TimeInterval?
 
   @Relationship(deleteRule: .cascade)
-  var intervals: [SessionInterval]
+  var intervals: [PeriodInterval]
   
-  var sessionDuration: TimeInterval {
-    intervals.reduce(into: 0) { totalSum, interval in
-      totalSum += interval.duration
+  var periodDuration: TimeInterval {
+    intervals.reduce(into: 0) { total, interval in
+      total += interval.duration
     }
   }
   var interruptionsDuration: TimeInterval {
     guard intervals.count >= 2 else { return 0 }
     let sortedIntervals = intervals.sorted(by: { $0.startTime < $1.startTime })
     
-    var totalDuration: TimeInterval = 0
+    var total: TimeInterval = 0
     for i in 0..<(sortedIntervals.count - 1) {
       guard let pauseStartTime: Date = sortedIntervals[i].endTime else { continue }
       let pauseEndTime: Date = sortedIntervals[i + 1].startTime
-      totalDuration += pauseStartTime.distance(to: pauseEndTime)
+      total += pauseStartTime.distance(to: pauseEndTime)
     }
     
-    return totalDuration
+    return total
   }
   var isCompleted: Bool {
     guard let target = targetDuration else { return false }
-    return sessionDuration >= target
+    
+    return periodDuration >= target
   }
   
-  init(title: String = "", sessionState: SessionState = SessionState.active, targetDuration: TimeInterval? = nil, intervals: [SessionInterval] = []) {
+  var isIntervalClosed: Bool {
+    return intervals.last?.endTime != nil
+  }
+  var calculateFragmentedType: FragmentedType {
+    switch intervals.count {
+    case 1: return FragmentedType.solid
+    default: return FragmentedType.fragmented
+    }
+  }
+  
+  
+  init(title: String = "", fragmentedType: FragmentedType = FragmentedType.undetermined, targetDuration: TimeInterval? = nil, intervals: [PeriodInterval] = []) {
     self.title = title
     self.targetDuration = targetDuration
-    self.sessionState = sessionState
+    self.fragmentedType = fragmentedType
     self.intervals = intervals
   }
 }

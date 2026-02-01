@@ -11,7 +11,7 @@ import SwiftData
 struct StatisticsTabView: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(TimerManager.self) private var timerManager
-  @Query var sessions: [Session]
+  @Query var sessions: [Period]
   
   var body: some View {
     NavigationStack {
@@ -20,12 +20,12 @@ struct StatisticsTabView: View {
           VStack(alignment: .leading) {
             Text(session.title.isEmpty ? "Без названия" : session.title)
               .font(.headline)
-            Text(session.sessionState.rawValue)
+            Text(session.fragmentedType.rawValue)
             
             HStack {
               Text("Интервалов: \(session.intervals.count)")
               Spacer()
-              Text(String(format: "Событие %.2f", session.sessionDuration))
+              Text(String(format: "Событие %.2f", session.periodDuration))
                 .foregroundStyle(.secondary)
               Text(String(format: "Перерывы %.2f", session.interruptionsDuration))
                 .foregroundStyle(.secondary)
@@ -58,7 +58,7 @@ func clearDatabase(modelContext: ModelContext) {
     let context = modelContext // ваш context
     do {
         // Удаляет все записи типа MyModel
-        try context.delete(model: Session.self)
+        try context.delete(model: Period.self)
         // Если моделей несколько, нужно повторить для каждой
         // try context.delete(model: OtherModel.self)
         
@@ -71,7 +71,7 @@ func clearDatabase(modelContext: ModelContext) {
 
 #Preview {
   StatisticsTabView()
-    .modelContainer(for: [Session.self, SessionInterval.self])
+    .modelContainer(for: [Period.self, PeriodInterval.self])
     .environment(TimerManager(settingsManager: SettingsManager.shared))
     .tint(.purple.mix(with: .red, by: 0.6))
 }

@@ -9,146 +9,90 @@ import Foundation
 import SwiftData
 
 
-enum TimerState {
+enum PeriodState {
   case idle
   case active
   case paused
   case finished
 }
 
-enum TimerType {
-  case work
-  case shortRest
-  case longRest
+enum PeriodType {
+  case session
+  case shortBreak
+  case longBreak
 }
 
-enum WorkSessionState {
-  case notStarted
+enum SessionIndicator {
+  case notStart
   case didStarted
   case finished
 }
 
-enum CancelType {
-  case toPrevious
-  case toStart
+enum ReturnType {
+  case toOne
+  case toTop
 }
 
 @Observable
 final class TimerManager {
   private let settingsManager: SettingsManager
   
-  var state: TimerState = .idle
-  var type: TimerType = .work
-  var activeSession: Session?
+  private var activePeriod: Period?
+  var periodState: PeriodState = .idle
+  private var periodType: PeriodType = .session
   
   init(settingsManager: SettingsManager = .shared) {
     self.settingsManager = settingsManager
   }
   
-  
-  private static let timeFormatter: DateComponentsFormatter = {
-    let formatter = DateComponentsFormatter()
-    formatter.allowedUnits = [.minute, .second]
-    formatter.zeroFormattingBehavior = .pad
-    return formatter
-  }()
-  
-  // MARK: - Session State Computed Properties
-  
-  private var isCompleted: Bool? {
-    guard let session = activeSession, let target = session.targetDuration else { return nil }
-    
-    let total = session.intervals.reduce(into: 0) { total, interval in
-      total += interval.duration
-    }
-    return total >= target
-  }
-  
-  private var calculateSessionType: SessionState? {
-    guard let session = activeSession else { return nil }
-    
-    switch session.intervals.count {
-    case 1: return SessionState.solid
-    default: return SessionState.fragmented
-    }
-  }
-  
-  private var totalNumberOfSessions: Int {
-    settingsManager.sessionDuration
-  }
-  
-  private var isIntervalClosed: Bool {
-    return activeSession?.intervals.last?.endTime != nil
-  }
-  
   // MARK: - Session
   
-  private var sessionCount = 0
-  private var workSessionState: WorkSessionState = .notStarted
+  private var currentSessionNumber = 0
+  private var currentSessionIndicator: SessionIndicator = .notStart
   
-  func getSessionsTotalNumber() -> Int {
-    return settingsManager.sessionCount
-  }
-  
-  func getCurrentSessionNumber() -> Int {
-    return sessionCount
-  }
-  
-  func getWorkSessionState() -> WorkSessionState {
-    return workSessionState
-  }
   
   func increaseSessionCount() {
-    sessionCount += 1
+    currentSessionNumber += 1
   }
   
   func decreaseSessionCount() {
-    sessionCount = max(0, sessionCount - 1)
+    currentSessionNumber = max(0, currentSessionNumber - 1)
   }
   
   func resetSessionCount() {
-    sessionCount = 0
+    currentSessionNumber = 0
   }
   
-  func createSession(modelContext: ModelContext) {
-    let restTitle = "Перерыв"
+  func createPeriod(modelContext: ModelContext) {
+    let breakTitle = "Перерыв"
     
     var sessionTitle: String
     var sessionDuration: Int
     
-    switch type {
-    case .work:
+    switch periodType {
+    case .session:
       sessionTitle = "Selenite"
       sessionDuration = settingsManager.sessionDuration
-    case .shortRest:
-      sessionTitle = restTitle
+    case .shortBreak:
+      sessionTitle = breakTitle
       sessionDuration = settingsManager.shortBreakDuration
-    case .longRest:
-      sessionTitle = restTitle
+    case .longBreak:
+      sessionTitle = breakTitle
       sessionDuration = settingsManager.longBreakDuration
     }
     
-    let newSession = Session(title: sessionTitle, sessionState: .active, targetDuration: TimeInterval(sessionDuration))
-    activeSession = newSession
-    
-    switch type {
-    case .work: modelContext.insert(newSession)
+    let newPeriod = Period(title: sessionTitle, targetDuration: TimeInterval(sessionDuration))
+    activePeriod = newPeriod
+  
+    switch periodType {
+    case .session: modelContext.insert(newPeriod)
     default: break
     }
   }
   
-  func endSession() {
-    activeSession = nil
-  }
-  
-  // MARK: - Interval
-  
-  func appendOpenInterval() {
-    activeSession?.intervals.append(SessionInterval(startTime: Date()))
-  }
-  
-  func closeCurrentInterval() {
-    activeSession?.intervals.last?.endTime = Date()
+  func endPeriod() {
+    activePeriod = nil
+    periodState = .idle
   }
   
   // MARK: - Breaks Logic
@@ -171,33 +115,43 @@ final class TimerManager {
     breaksCount = 0
   }
   
-  func updateType() {
-    switch type {
-    case .work:
-      type = nextBreakAreLong ? .longRest : .shortRest
+  func updatePeriodTypeAfterTimerEnding() {
+    switch periodType {
+    case .session:
+      periodType = nextBreakAreLong ? .longBreak : .shortBreak
       
-    case .shortRest, .longRest:
-      if type == .shortRest {
+    case .shortBreak, .longBreak:
+      if periodType == .shortBreak {
         increaseBreaksCount()
       } else {
         resetBreaksCount()
         resetSessionCount()
       }
-      type = .work
+      periodType = .session
     }
   }
   
-  func cancelToPreviousUpdateType() {
-    switch type {
-    case .work:
-      decreaseBreaksCount()
-      decreaseSessionCount()
-      if sessionCount > 0 { type = .shortRest }
-    case .shortRest:
-      type = .work
-    case .longRest:
-      type = .work
-    }
+//  func cancelToPreviousUpdateType() {
+//    switch periodType {
+//    case .session:
+//      decreaseBreaksCount()
+//      decreaseSessionCount()
+//      if currentSessionNumber > 0 { periodType = .shortBreak }
+//    case .shortBreak:
+//      periodType = .session
+//    case .longBreak:
+//      periodType = .session
+//    }
+//  }
+  
+  // MARK: - Interval
+  
+  func appendOpenInterval() {
+    activePeriod?.intervals.append(PeriodInterval(startTime: Date()))
+  }
+  
+  func closeCurrentInterval() {
+    activePeriod?.intervals.last?.endTime = Date()
   }
   
   // MARK: - Timer Controls
@@ -206,85 +160,94 @@ final class TimerManager {
   
   private var timer: Timer?
   
+  
   func startTimer(modelContext: ModelContext) {
-    createSession(modelContext: modelContext)
+    createPeriod(modelContext: modelContext)
     appendOpenInterval()
-    state = .active
-    if type == .work {
-      workSessionState = .didStarted
+    periodState = .active
+    if periodType == .session {
+      currentSessionIndicator = .didStarted
       increaseSessionCount()
     }
     startPulse()
   }
   
   func timerEnded() {
-    guard state != .finished else { return }
+    guard periodState != .finished else { return } // TODO: попробывать убрать
     
     stopPulse()
     closeCurrentInterval()
-    state = .finished
+    periodState = .finished
     
-    guard let state = calculateSessionType else { return }
-    activeSession?.sessionState = state
+    // calculates the fragmented type
+    guard let fragmentedType = activePeriod?.calculateFragmentedType else { return }
+    activePeriod?.fragmentedType = fragmentedType
     
+    // after 1 sec ends the session, change indicator and update period type
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: { [weak self] in
-      self?.endSession()
-      self?.state = .idle
-      if self?.type == .work {
-        self?.workSessionState = .finished
+      self?.endPeriod()
+      self?.periodState = .idle
+      if self?.periodType == .session {
+        self?.currentSessionIndicator = .finished
       }
-      self?.updateType()
+      self?.updatePeriodTypeAfterTimerEnding()
     })
   }
   
   
   func resumeTimer() {
     appendOpenInterval()
-    state = .active
+    periodState = .active
     startPulse()
   }
   
   func pauseTimer() {
     closeCurrentInterval()
-    state = .paused
+    periodState = .paused
     stopPulse()
   }
   
+  // MARK: Skip Time Logic
   func skipTime() {
-    guard let session = activeSession else {
-      if type == .work {
+    switch periodState {
+    case .idle:
+      if periodType == .session {
         increaseSessionCount()
-        workSessionState = .finished
-        updateType()
-      } else {
-        updateType()
+        currentSessionIndicator = .finished
       }
-      return
+      
+    default:
+      guard let period = activePeriod else { return }
+      
+      if periodType == .session {
+        if !period.isIntervalClosed { closeCurrentInterval() }
+        currentSessionIndicator = .finished
+      }
+      stopPulse()
+      endPeriod()
     }
-    stopPulse()
-    if !isIntervalClosed {
-      closeCurrentInterval()
-    }
-    state = .idle
     
-    guard let state = calculateSessionType else { return }
-    session.sessionState = state
-    
-    endSession()
-    if type == .work {
-      workSessionState = .finished
-    }
-    updateType()
+    updatePeriodTypeAfterTimerEnding()
   }
   
-  func cancelTime(cancelType: CancelType, modelContext: ModelContext) {
-    state = .idle
-    workSessionState = .notStarted
   
-    switch cancelType {
-    case .toPrevious:
-      cancelToPreviousUpdateType()
-    case .toStart: break
+  // TODO: Return Logic
+  func returnPeriods(returnType: ReturnType, modelContext: ModelContext) {
+    switch returnType {
+    case .toOne: break
+    case .toTop:
+      switch periodState {
+      case .idle: break
+      default:
+        guard let period = activePeriod else { return }
+        modelContext.delete(period)
+        stopPulse()
+        endPeriod()
+      }
+      resetBreaksCount()
+      resetSessionCount()
+      periodType = .session
+      currentSessionIndicator = .notStart
     }
   }
   
@@ -292,13 +255,7 @@ final class TimerManager {
   
   func startPulse() {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-      guard let self = self, let isCompleted = isCompleted else { return }
-      
-      // DEBUG
-      print("---PULSE---")
-      for interval in activeSession?.intervals ?? [] {
-        print(interval.startTime, interval.endTime ?? "nil")
-      }
+      guard let self = self, let isCompleted = activePeriod?.isCompleted else { return }
       
       self.pulse.toggle()
       
@@ -313,7 +270,15 @@ final class TimerManager {
     timer = nil
   }
   
-  // MARK: - View
+  // MARK: - View Logic
+  
+  // MARK: Time Formatting
+  private static let timeFormatter: DateComponentsFormatter = {
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = [.minute, .second]
+    formatter.zeroFormattingBehavior = .pad
+    return formatter
+  }()
   
   func remainingTime() -> String {
     let time = remainingTimeInterval()
@@ -322,29 +287,30 @@ final class TimerManager {
   }
   
   func remainingTimeInterval() -> TimeInterval {
-    guard let session = activeSession else {
+    guard let period = activePeriod else {
       var remainingTime: Int
-      switch type {
-      case .work:
+      switch periodType {
+      case .session:
         remainingTime = settingsManager.sessionDuration
-      case .shortRest:
+      case .shortBreak:
         remainingTime = settingsManager.shortBreakDuration
-      case .longRest:
+      case .longBreak:
         remainingTime = settingsManager.longBreakDuration
       }
       return TimeInterval(remainingTime)
     }
     
-    let targetDuration = session.targetDuration ?? 0
-    let sessionDuration = session.sessionDuration
+    let targetDuration = period.targetDuration ?? 0
+    let sessionDuration = period.periodDuration
     
     let total = targetDuration - sessionDuration
     
     return max(0, total).rounded(.up)
   }
   
+  // MARK: Play/Pause Button
   func playButtonAction(modelContext: ModelContext) {
-    switch state {
+    switch periodState {
     case .idle:
       startTimer(modelContext: modelContext)
     case .active:
@@ -357,7 +323,7 @@ final class TimerManager {
   }
   
   func playButtonSystemImage() -> String {
-    switch state {
+    switch periodState {
     case .idle:
       "play.fill"
     case .active:
@@ -367,5 +333,32 @@ final class TimerManager {
     case .finished:
       "pause.fill"
     }
+  }
+  
+  // MARK: Prev/Next Buttons
+  func previousButtonAction(modelContext: ModelContext) {
+    returnPeriods(returnType: .toOne, modelContext: modelContext)
+  }
+  
+  func nextButtonAction() {
+    skipTime()
+  }
+  
+  // MARK: Reset Button
+  func resetButtonAction(modelContext: ModelContext) {
+    returnPeriods(returnType: .toTop, modelContext: modelContext)
+  }
+  
+  // MARK: Session Indicators
+  func getSessionsTotalNumber() -> Int {
+    return settingsManager.sessionCount
+  }
+  
+  func getCurrentSessionNumber() -> Int {
+    return currentSessionNumber
+  }
+  
+  func getCurrentSessionIndicator() -> SessionIndicator {
+    return currentSessionIndicator
   }
 }
