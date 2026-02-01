@@ -15,12 +15,24 @@ struct TimerTabView: View {
   var body: some View {
     let _ = timerManager.pulse
     VStack(spacing: 5) {
+      // RESTART BUTTON
+      Button(action: { timerManager.cancelTime(cancelType: .toStart, modelContext: modelContext) }) {
+        Image(systemName: "arrow.counterclockwise.circle.fill")
+      }
+      .buttonStyle(.glassProminent)
+      .buttonBorderShape(.circle)
+      .controlSize(.extraLarge)
+      
       // TIMER
       Text(timerManager.remainingTime())
         .font(.system(size: 82))
         .fontWeight(.medium)
       
       HStack {
+        Button(action: { timerManager.cancelTime(cancelType: .toPrevious, modelContext: modelContext) }) {
+          Image(systemName: "chevron.left")
+        }
+        
         // PLAY/PAUSE BUTTON
         Button(action: { timerManager.playButtonAction(modelContext: modelContext) }) {
           Image(systemName: timerManager.playButtonSystemImage())

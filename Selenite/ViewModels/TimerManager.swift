@@ -102,6 +102,10 @@ final class TimerManager {
     sessionCount += 1
   }
   
+  func decreaseSessionCount() {
+    sessionCount = max(0, sessionCount - 1)
+  }
+  
   func resetSessionCount() {
     sessionCount = 0
   }
@@ -159,6 +163,10 @@ final class TimerManager {
     breaksCount += 1
   }
   
+  func decreaseBreaksCount() {
+    breaksCount = max(0, breaksCount - 1)
+  }
+  
   func resetBreaksCount() {
     breaksCount = 0
   }
@@ -175,6 +183,19 @@ final class TimerManager {
         resetBreaksCount()
         resetSessionCount()
       }
+      type = .work
+    }
+  }
+  
+  func cancelToPreviousUpdateType() {
+    switch type {
+    case .work:
+      decreaseBreaksCount()
+      decreaseSessionCount()
+      if sessionCount > 0 { type = .shortRest }
+    case .shortRest:
+      type = .work
+    case .longRest:
       type = .work
     }
   }
@@ -257,15 +278,14 @@ final class TimerManager {
   }
   
   func cancelTime(cancelType: CancelType, modelContext: ModelContext) {
-    stopPulse()
-    closeCurrentInterval()
     state = .idle
-    
-    if let sessionToDelete = activeSession, type == .work {
-      modelContext.delete(sessionToDelete)
+    workSessionState = .notStarted
+  
+    switch cancelType {
+    case .toPrevious:
+      cancelToPreviousUpdateType()
+    case .toStart: break
     }
-    
-    
   }
   
   // MARK: - Pulsing Control
