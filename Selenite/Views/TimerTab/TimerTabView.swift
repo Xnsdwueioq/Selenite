@@ -20,14 +20,20 @@ struct TimerTabView: View {
         .font(.system(size: 82))
         .fontWeight(.medium)
       
-      // PLAY/PAUSE BUTTON
-      Button(action: { timerManager.playButtonAction(modelContext: modelContext) }) {
-        Image(systemName: timerManager.playButtonSystemImage())
-          .animation(.none, value: timerManager.state)
+      HStack {
+        // PLAY/PAUSE BUTTON
+        Button(action: { timerManager.playButtonAction(modelContext: modelContext) }) {
+          Image(systemName: timerManager.playButtonSystemImage())
+            .animation(.none, value: timerManager.state)
+        }
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.circle)
+        .controlSize(.extraLarge)
+        
+        Button(action: { timerManager.skipTime() }) {
+          Image(systemName: "chevron.right")
+        }
       }
-      .buttonStyle(.glassProminent)
-      .buttonBorderShape(.circle)
-      .controlSize(.extraLarge)
       
       // INDICATORS
       SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), workSessionState: timerManager.getWorkSessionState())

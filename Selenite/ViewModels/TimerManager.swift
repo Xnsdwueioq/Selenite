@@ -28,6 +28,11 @@ enum WorkSessionState {
   case finished
 }
 
+enum CancelType {
+  case toPrevious
+  case toStart
+}
+
 @Observable
 final class TimerManager {
   private let settingsManager: SettingsManager
@@ -70,6 +75,10 @@ final class TimerManager {
   
   private var totalNumberOfSessions: Int {
     settingsManager.sessionDuration
+  }
+  
+  private var isIntervalClosed: Bool {
+    return activeSession?.intervals.last?.endTime != nil
   }
   
   // MARK: - Session
@@ -170,7 +179,7 @@ final class TimerManager {
     }
   }
   
-  // MARK: - Timer Control
+  // MARK: - Timer Controls
   
   var pulse: Bool = false
   
@@ -218,6 +227,45 @@ final class TimerManager {
     closeCurrentInterval()
     state = .paused
     stopPulse()
+  }
+  
+  func skipTime() {
+    guard let session = activeSession else {
+      if type == .work {
+        increaseSessionCount()
+        workSessionState = .finished
+        updateType()
+      } else {
+        updateType()
+      }
+      return
+    }
+    stopPulse()
+    if !isIntervalClosed {
+      closeCurrentInterval()
+    }
+    state = .idle
+    
+    guard let state = calculateSessionType else { return }
+    session.sessionState = state
+    
+    endSession()
+    if type == .work {
+      workSessionState = .finished
+    }
+    updateType()
+  }
+  
+  func cancelTime(cancelType: CancelType, modelContext: ModelContext) {
+    stopPulse()
+    closeCurrentInterval()
+    state = .idle
+    
+    if let sessionToDelete = activeSession, type == .work {
+      modelContext.delete(sessionToDelete)
+    }
+    
+    
   }
   
   // MARK: - Pulsing Control
