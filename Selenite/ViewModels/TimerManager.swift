@@ -138,10 +138,10 @@ final class TimerManager {
     if periodType == .session {
       currentSessionIndicator = .didStarted
     }
-    startPulse()
+    startPulse(modelContext: modelContext)
   }
   
-  func timerEnded() {
+  func timerEnded(modelContext: ModelContext) {
     stopPulse()
     closeCurrentInterval()
     periodState = .idle
@@ -155,6 +155,13 @@ final class TimerManager {
     
     endPeriod()
     updatePeriodType()
+    
+    switch periodType {
+    case .session:
+      if settingsManager.sessionAutostart { startTimer(modelContext: modelContext) }
+    case .shortBreak, .longBreak:
+      if settingsManager.breakAutostart { startTimer(modelContext: modelContext) }
+    }
   }
   
   func updatePeriodType() {
@@ -176,10 +183,10 @@ final class TimerManager {
     }
   }
   
-  func resumeTimer() {
+  func resumeTimer(modelContext: ModelContext) {
     appendOpenInterval()
     periodState = .active
-    startPulse()
+    startPulse(modelContext: modelContext)
   }
   
   func pauseTimer() {
@@ -269,14 +276,14 @@ final class TimerManager {
   
   // MARK: - Pulsing Control
   
-  func startPulse() {
+  func startPulse(modelContext: ModelContext) {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
       guard let self = self, let isCompleted = activePeriod?.isCompleted else { return }
       
       self.pulse.toggle()
       
       if isCompleted {
-        timerEnded()
+        timerEnded(modelContext: modelContext)
       }
     })
   }
@@ -333,7 +340,7 @@ final class TimerManager {
     case .active:
       pauseTimer()
     case .paused:
-      resumeTimer()
+      resumeTimer(modelContext: modelContext)
     }
     printData(with: "---new data")
   }
