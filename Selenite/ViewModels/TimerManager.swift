@@ -323,12 +323,14 @@ final class TimerManager {
       return TimeInterval(remainingTime)
     }
     
+    let visualCompensation: TimeInterval = 1
+    
     let targetDuration = period.targetDuration ?? 0
     let sessionDuration = period.periodDuration
     
-    let total = targetDuration - sessionDuration - 1
+    let total = targetDuration - sessionDuration
     
-    return max(0, total).rounded(.up)
+    return max(0, total - visualCompensation).rounded(.up)
   }
   
   // MARK: Play/Pause Button
