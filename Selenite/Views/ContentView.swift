@@ -8,33 +8,51 @@
 import SwiftUI
 import SwiftData
 
+
+enum AppTab: Identifiable {
+  case statistics
+  case timer
+  case settings
+  
+  var id: Self { return self }
+  
+  var systemImage: String {
+    switch self {
+    case .statistics: return "chart.bar.xaxis"
+    case .timer: return "play"
+    case .settings: return "gear"
+    }
+  }
+}
+
 struct ContentView: View {
   @Environment(\.modelContext) private var modelContext
   @State private var timerManager = TimerManager(settingsManager: .shared)
+  @State private var selectedTab = AppTab.timer
   
   var body: some View {
-    TabView {
-      // MARK: Statistics Tab
-      Tab(content: {
+    TabView(selection: $selectedTab) {
+      // MARK: Statistic Tab
+      Tab(value: AppTab.statistics, content: {
         StatisticsTabView()
-      }) {
-        Image(systemName: "chart.bar.xaxis")
-      }
+      }, label: {
+        Image(systemName: AppTab.statistics.systemImage)
+      })
       
       // MARK: Timer Tab
-      Tab(content: {
+      Tab(value: AppTab.timer, content: {
         TimerTabView()
           .environment(timerManager)
-      }) {
-        Image(systemName: "play")
-      }
+      }, label: {
+        Image(systemName: AppTab.timer.systemImage)
+      })
       
       // MARK: Settings Tab
-      Tab(content: {
+      Tab(value: AppTab.settings, content: {
         SettingsTabView()
-      }) {
-        Image(systemName: "gear")
-      }
+      }, label: {
+        Image(systemName: AppTab.settings.systemImage)
+      })
     }
     .onAppear {
       timerManager.modelContext = modelContext
@@ -44,19 +62,17 @@ struct ContentView: View {
 }
 
 #Preview {
-  // 1. Готовим зависимости
-      let container: ModelContainer = {
-          let config = ModelConfiguration(isStoredInMemoryOnly: true)
-          return try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
-      }()
-      
-      let previewManager = TimerManager(
-          settingsManager: .shared,
-          modelContext: container.mainContext
-      )
-      
-      // 2. Просто возвращаем View (без слова return)
-      ContentView()
-          .modelContainer(container)
-          .environment(previewManager)
+  let container: ModelContainer = {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    return try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
+  }()
+  
+  let previewManager = TimerManager(
+    settingsManager: .shared,
+    modelContext: container.mainContext
+  )
+  
+  ContentView()
+    .modelContainer(container)
+    .environment(previewManager)
 }

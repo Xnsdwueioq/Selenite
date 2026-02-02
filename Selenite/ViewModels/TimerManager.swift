@@ -158,6 +158,10 @@ final class TimerManager {
     endPeriod()
     updatePeriodType()
     
+    if periodType != .session && settingsManager.areBreaksDisabled {
+      skipTime()
+    }
+    
     switch periodType {
     case .session:
       if settingsManager.sessionAutostart { startTimer() }
@@ -213,12 +217,18 @@ final class TimerManager {
     }
     periodState = .idle
     updatePeriodType()
+    if periodType != .session && settingsManager.areBreaksDisabled {
+      skipTime()
+    }
   }
   
   func returnPeriods(returnType: ReturnType) {
     switch returnType {
     case .toOne:
       updateReturnType()
+      if periodType != .session && settingsManager.areBreaksDisabled {
+        returnPeriods(returnType: .toOne)
+      }
       
     case .toTop:
       switch periodState {
