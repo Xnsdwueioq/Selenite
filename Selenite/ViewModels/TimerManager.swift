@@ -13,7 +13,6 @@ enum PeriodState {
   case idle
   case active
   case paused
-  case finished
 }
 
 enum PeriodType {
@@ -47,20 +46,20 @@ final class TimerManager {
   
   // MARK: - Session
   
-  private var currentSessionNumber = 0
+  private var currentSessionNumber = 1
   private var currentSessionIndicator: SessionIndicator = .notStart
   
   
-  func increaseSessionCount() {
+  func increaseSessionNumber() {
     currentSessionNumber += 1
   }
   
-  func decreaseSessionCount() {
-    currentSessionNumber = max(0, currentSessionNumber - 1)
+  func decreaseSessionNumber() {
+    currentSessionNumber = max(1, currentSessionNumber - 1)
   }
   
-  func resetSessionCount() {
-    currentSessionNumber = 0
+  func resetSessionNumber() {
+    currentSessionNumber = 1
   }
   
   func createPeriod(modelContext: ModelContext) {
@@ -83,7 +82,7 @@ final class TimerManager {
     
     let newPeriod = Period(title: sessionTitle, targetDuration: TimeInterval(sessionDuration))
     activePeriod = newPeriod
-  
+    
     switch periodType {
     case .session: modelContext.insert(newPeriod)
     default: break
@@ -92,7 +91,6 @@ final class TimerManager {
   
   func endPeriod() {
     activePeriod = nil
-    periodState = .idle
   }
   
   // MARK: - Breaks Logic
@@ -102,6 +100,7 @@ final class TimerManager {
   private var nextBreakAreLong: Bool {
     return (breaksCount + 1) == settingsManager.sessionCount
   }
+  
   
   func increaseBreaksCount() {
     breaksCount += 1
@@ -114,35 +113,6 @@ final class TimerManager {
   func resetBreaksCount() {
     breaksCount = 0
   }
-  
-  func updatePeriodTypeAfterTimerEnding() {
-    switch periodType {
-    case .session:
-      periodType = nextBreakAreLong ? .longBreak : .shortBreak
-      
-    case .shortBreak, .longBreak:
-      if periodType == .shortBreak {
-        increaseBreaksCount()
-      } else {
-        resetBreaksCount()
-        resetSessionCount()
-      }
-      periodType = .session
-    }
-  }
-  
-//  func cancelToPreviousUpdateType() {
-//    switch periodType {
-//    case .session:
-//      decreaseBreaksCount()
-//      decreaseSessionCount()
-//      if currentSessionNumber > 0 { periodType = .shortBreak }
-//    case .shortBreak:
-//      periodType = .session
-//    case .longBreak:
-//      periodType = .session
-//    }
-//  }
   
   // MARK: - Interval
   
@@ -167,33 +137,44 @@ final class TimerManager {
     periodState = .active
     if periodType == .session {
       currentSessionIndicator = .didStarted
-      increaseSessionCount()
     }
     startPulse()
   }
   
   func timerEnded() {
-    guard periodState != .finished else { return } // TODO: попробывать убрать
-    
     stopPulse()
     closeCurrentInterval()
-    periodState = .finished
+    periodState = .idle
+    if periodType == .session {
+      currentSessionIndicator = .finished
+    }
     
     // calculates the fragmented type
     guard let fragmentedType = activePeriod?.calculateFragmentedType else { return }
     activePeriod?.fragmentedType = fragmentedType
     
-    // after 1 sec ends the session, change indicator and update period type
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: { [weak self] in
-      self?.endPeriod()
-      self?.periodState = .idle
-      if self?.periodType == .session {
-        self?.currentSessionIndicator = .finished
-      }
-      self?.updatePeriodTypeAfterTimerEnding()
-    })
+    endPeriod()
+    updatePeriodType()
   }
   
+  func updatePeriodType() {
+    switch periodType {
+    case .session:
+      currentSessionIndicator = .finished
+      periodType = nextBreakAreLong ? .longBreak : .shortBreak
+      
+    case .shortBreak, .longBreak:
+      if periodType == .shortBreak {
+        increaseBreaksCount()
+        increaseSessionNumber()
+      } else {
+        resetBreaksCount()
+        resetSessionNumber()
+      }
+      currentSessionIndicator = .notStart
+      periodType = .session
+    }
+  }
   
   func resumeTimer() {
     appendOpenInterval()
@@ -207,48 +188,82 @@ final class TimerManager {
     stopPulse()
   }
   
-  // MARK: Skip Time Logic
+  // MARK: Skip & Return Time Logic
   func skipTime() {
     switch periodState {
-    case .idle:
-      if periodType == .session {
-        increaseSessionCount()
-        currentSessionIndicator = .finished
-      }
-      
+    case .idle: break
     default:
+      stopPulse()
       guard let period = activePeriod else { return }
-      
+      if !period.isIntervalClosed { closeCurrentInterval() }
       if periodType == .session {
-        if !period.isIntervalClosed { closeCurrentInterval() }
         currentSessionIndicator = .finished
         period.fragmentedType = period.calculateFragmentedType
       }
-      stopPulse()
       endPeriod()
     }
-    
-    updatePeriodTypeAfterTimerEnding()
+    periodState = .idle
+    updatePeriodType()
   }
   
-  
-  // TODO: Return Logic
   func returnPeriods(returnType: ReturnType, modelContext: ModelContext) {
     switch returnType {
-    case .toOne: break
+    case .toOne:
+      updateReturnType()
+      
     case .toTop:
       switch periodState {
       case .idle: break
       default:
-        guard let period = activePeriod else { return }
-        modelContext.delete(period)
         stopPulse()
         endPeriod()
       }
       resetBreaksCount()
-      resetSessionCount()
+      resetSessionNumber()
       periodType = .session
       currentSessionIndicator = .notStart
+    }
+  }
+  
+  func updateReturnType() {
+    switch periodState {
+    case .idle:
+      
+      switch periodType {
+      case .session:
+        if !(currentSessionNumber == 1 && currentSessionIndicator == .notStart) {
+          periodType = .shortBreak
+          currentSessionIndicator = .notStart
+          decreaseBreaksCount()
+          
+          currentSessionIndicator = .finished
+          decreaseSessionNumber()
+        }
+        
+      case .shortBreak, .longBreak:
+        periodType = .session
+        currentSessionIndicator = .notStart
+      }
+      
+      
+    default:
+      if let period = activePeriod {
+        stopPulse()
+        if !period.isIntervalClosed {
+          closeCurrentInterval()
+          period.fragmentedType = period.calculateFragmentedType
+        }
+        endPeriod()
+      }
+      
+      
+      switch periodType {
+      case .session:
+        currentSessionIndicator = .notStart
+      case .shortBreak, .longBreak: break
+      }
+      
+      periodState = .idle
     }
   }
   
@@ -304,13 +319,14 @@ final class TimerManager {
     let targetDuration = period.targetDuration ?? 0
     let sessionDuration = period.periodDuration
     
-    let total = targetDuration - sessionDuration
+    let total = targetDuration - sessionDuration - 1
     
     return max(0, total).rounded(.up)
   }
   
   // MARK: Play/Pause Button
   func playButtonAction(modelContext: ModelContext) {
+    printData(with: "old data---")
     switch periodState {
     case .idle:
       startTimer(modelContext: modelContext)
@@ -318,9 +334,8 @@ final class TimerManager {
       pauseTimer()
     case .paused:
       resumeTimer()
-    case .finished:
-      return
     }
+    printData(with: "---new data")
   }
   
   func playButtonSystemImage() -> String {
@@ -331,8 +346,6 @@ final class TimerManager {
       "pause.fill"
     case .paused:
       "play.fill"
-    case .finished:
-      "pause.fill"
     }
   }
   
@@ -342,7 +355,11 @@ final class TimerManager {
   }
   
   func nextButtonAction() {
+    // DEBUG
+    printData(with: "---before skip")
     skipTime()
+    printData(with: "after skip---")
+    
   }
   
   // MARK: Reset Button
@@ -361,5 +378,16 @@ final class TimerManager {
   
   func getCurrentSessionIndicator() -> SessionIndicator {
     return currentSessionIndicator
+  }
+  
+  
+  // MARK: - Debug Module
+  func printData(with message: String) {
+    print(message)
+    print("curr session: \(currentSessionNumber)")
+    print("curr session indicator: \(currentSessionIndicator)")
+    print("breakCount: \(breaksCount)")
+    print("periodType: \(periodType)")
+    print("periodState: \(periodState)")
   }
 }
