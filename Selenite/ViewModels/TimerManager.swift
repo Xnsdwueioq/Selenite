@@ -222,6 +222,7 @@ final class TimerManager {
       if periodType == .session {
         if !period.isIntervalClosed { closeCurrentInterval() }
         currentSessionIndicator = .finished
+        period.fragmentedType = period.calculateFragmentedType
       }
       stopPulse()
       endPeriod()
