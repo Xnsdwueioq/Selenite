@@ -10,7 +10,6 @@ import SwiftData
 
 struct StatisticsTabView: View {
   @Environment(\.modelContext) private var modelContext
-  @Environment(TimerManager.self) private var timerManager
   @Query var sessions: [Period]
   
   var body: some View {

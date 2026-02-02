@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct TimerTabView: View {
-  @Environment(\.modelContext) private var modelContext: ModelContext
   @Environment(TimerManager.self) private var timerManager
   
   var body: some View {
@@ -17,7 +16,7 @@ struct TimerTabView: View {
     VStack(spacing: 5) {
       // RESTART BUTTON
       Button(action: {
-        timerManager.resetButtonAction(modelContext: modelContext)
+        timerManager.resetButtonAction()
       }) {
         Image(systemName: "arrow.counterclockwise.circle.fill")
       }
@@ -33,14 +32,14 @@ struct TimerTabView: View {
       HStack {
         // PREV BUTTON
         Button(action: {
-          timerManager.previousButtonAction(modelContext: modelContext)
+          timerManager.previousButtonAction()
         }) {
           Image(systemName: "chevron.left")
         }
         
         // PLAY/PAUSE BUTTON
         Button(action: {
-          timerManager.playButtonAction(modelContext: modelContext)
+          timerManager.playButtonAction()
         }) {
           Image(systemName: timerManager.playButtonSystemImage())
             .animation(.none, value: timerManager.periodState)
@@ -65,8 +64,18 @@ struct TimerTabView: View {
 
 
 #Preview {
+  let container: ModelContainer = {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    return try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
+  }()
+  
+  let previewManager = TimerManager(
+    settingsManager: .shared,
+    modelContext: container.mainContext
+  )
+  
   TimerTabView()
-    .modelContainer(for: [Period.self, PeriodInterval.self])
-    .environment(TimerManager(settingsManager: SettingsManager.shared))
+    .modelContainer(container)
+    .environment(previewManager)
     .tint(.purple.mix(with: .red, by: 0.6))
 }

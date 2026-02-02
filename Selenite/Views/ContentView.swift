@@ -9,30 +9,54 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-  @State private var timerManager = TimerManager(settingsManager: SettingsManager.shared)
+  @Environment(\.modelContext) private var modelContext
+  @State private var timerManager = TimerManager(settingsManager: .shared)
   
   var body: some View {
     TabView {
-      Tab(content: { StatisticsTabView() }) {
+      // MARK: Statistics Tab
+      Tab(content: {
+        StatisticsTabView()
+      }) {
         Image(systemName: "chart.bar.xaxis")
       }
-      Tab(content: { TimerTabView() }) {
+      
+      // MARK: Timer Tab
+      Tab(content: {
+        TimerTabView()
+          .environment(timerManager)
+      }) {
         Image(systemName: "play")
       }
-      Tab(content: { SettingsTabView() }) {
+      
+      // MARK: Settings Tab
+      Tab(content: {
+        SettingsTabView()
+      }) {
         Image(systemName: "gear")
       }
     }
+    .onAppear {
+      timerManager.modelContext = modelContext
+    }
     .tint(.purple.mix(with: .red, by: 0.6))
-    .environment(timerManager)
   }
 }
 
 #Preview {
-  let config = ModelConfiguration(isStoredInMemoryOnly: true)
-  let container = try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
-  
-  return ContentView()
-    .modelContainer(container)
-    .environment(TimerManager(settingsManager: SettingsManager.shared))
+  // 1. Готовим зависимости
+      let container: ModelContainer = {
+          let config = ModelConfiguration(isStoredInMemoryOnly: true)
+          return try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
+      }()
+      
+      let previewManager = TimerManager(
+          settingsManager: .shared,
+          modelContext: container.mainContext
+      )
+      
+      // 2. Просто возвращаем View (без слова return)
+      ContentView()
+          .modelContainer(container)
+          .environment(previewManager)
 }

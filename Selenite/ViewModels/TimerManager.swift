@@ -35,13 +35,15 @@ enum ReturnType {
 @Observable
 final class TimerManager {
   private let settingsManager: SettingsManager
+  var modelContext: ModelContext?
   
   private var activePeriod: Period?
   var periodState: PeriodState = .idle
   private var periodType: PeriodType = .session
   
-  init(settingsManager: SettingsManager = .shared) {
+  init(settingsManager: SettingsManager = .shared, modelContext: ModelContext? = nil) {
     self.settingsManager = settingsManager
+    self.modelContext = modelContext
   }
   
   // MARK: - Session
@@ -62,7 +64,7 @@ final class TimerManager {
     currentSessionNumber = 1
   }
   
-  func createPeriod(modelContext: ModelContext) {
+  func createPeriod() {
     let breakTitle = "Перерыв"
     
     var sessionTitle: String
@@ -84,7 +86,7 @@ final class TimerManager {
     activePeriod = newPeriod
     
     switch periodType {
-    case .session: modelContext.insert(newPeriod)
+    case .session: modelContext?.insert(newPeriod)
     default: break
     }
   }
@@ -131,17 +133,17 @@ final class TimerManager {
   private var timer: Timer?
   
   
-  func startTimer(modelContext: ModelContext) {
-    createPeriod(modelContext: modelContext)
+  func startTimer() {
+    createPeriod()
     appendOpenInterval()
     periodState = .active
     if periodType == .session {
       currentSessionIndicator = .didStarted
     }
-    startPulse(modelContext: modelContext)
+    startPulse()
   }
   
-  func timerEnded(modelContext: ModelContext) {
+  func timerEnded() {
     stopPulse()
     closeCurrentInterval()
     periodState = .idle
@@ -158,9 +160,9 @@ final class TimerManager {
     
     switch periodType {
     case .session:
-      if settingsManager.sessionAutostart { startTimer(modelContext: modelContext) }
+      if settingsManager.sessionAutostart { startTimer() }
     case .shortBreak, .longBreak:
-      if settingsManager.breakAutostart { startTimer(modelContext: modelContext) }
+      if settingsManager.breakAutostart { startTimer() }
     }
   }
   
@@ -183,10 +185,10 @@ final class TimerManager {
     }
   }
   
-  func resumeTimer(modelContext: ModelContext) {
+  func resumeTimer() {
     appendOpenInterval()
     periodState = .active
-    startPulse(modelContext: modelContext)
+    startPulse()
   }
   
   func pauseTimer() {
@@ -213,7 +215,7 @@ final class TimerManager {
     updatePeriodType()
   }
   
-  func returnPeriods(returnType: ReturnType, modelContext: ModelContext) {
+  func returnPeriods(returnType: ReturnType) {
     switch returnType {
     case .toOne:
       updateReturnType()
@@ -276,14 +278,14 @@ final class TimerManager {
   
   // MARK: - Pulsing Control
   
-  func startPulse(modelContext: ModelContext) {
+  func startPulse() {
     timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
       guard let self = self, let isCompleted = activePeriod?.isCompleted else { return }
       
       self.pulse.toggle()
       
       if isCompleted {
-        timerEnded(modelContext: modelContext)
+        timerEnded()
       }
     })
   }
@@ -334,15 +336,15 @@ final class TimerManager {
   }
   
   // MARK: Play/Pause Button
-  func playButtonAction(modelContext: ModelContext) {
+  func playButtonAction() {
     printData(with: "old data---")
     switch periodState {
     case .idle:
-      startTimer(modelContext: modelContext)
+      startTimer()
     case .active:
       pauseTimer()
     case .paused:
-      resumeTimer(modelContext: modelContext)
+      resumeTimer()
     }
     printData(with: "---new data")
   }
@@ -359,8 +361,8 @@ final class TimerManager {
   }
   
   // MARK: Prev/Next Buttons
-  func previousButtonAction(modelContext: ModelContext) {
-    returnPeriods(returnType: .toOne, modelContext: modelContext)
+  func previousButtonAction() {
+    returnPeriods(returnType: .toOne)
   }
   
   func nextButtonAction() {
@@ -372,8 +374,8 @@ final class TimerManager {
   }
   
   // MARK: Reset Button
-  func resetButtonAction(modelContext: ModelContext) {
-    returnPeriods(returnType: .toTop, modelContext: modelContext)
+  func resetButtonAction() {
+    returnPeriods(returnType: .toTop)
   }
   
   // MARK: Session Indicators
