@@ -30,9 +30,9 @@ struct ContentView: View {
 
 #Preview {
   let config = ModelConfiguration(isStoredInMemoryOnly: true)
-      let container = try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
-      
-      return ContentView()
-          .modelContainer(container)
-          .environment(TimerManager(settingsManager: SettingsManager.shared))
+  let container = try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
+  
+  return ContentView()
+    .modelContainer(container)
+    .environment(TimerManager(settingsManager: SettingsManager.shared))
 }

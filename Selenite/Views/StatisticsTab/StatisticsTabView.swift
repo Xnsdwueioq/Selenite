@@ -55,18 +55,18 @@ struct StatisticsTabView: View {
 
 @MainActor
 func clearDatabase(modelContext: ModelContext) {
-    let context = modelContext // ваш context
-    do {
-        // Удаляет все записи типа MyModel
-        try context.delete(model: Period.self)
-        // Если моделей несколько, нужно повторить для каждой
-        // try context.delete(model: OtherModel.self)
-        
-        try context.save()
-        print("База очищена")
-    } catch {
-        print("Ошибка при очистке: \(error)")
-    }
+  let context = modelContext // ваш context
+  do {
+    // Удаляет все записи типа MyModel
+    try context.delete(model: Period.self)
+    // Если моделей несколько, нужно повторить для каждой
+    // try context.delete(model: OtherModel.self)
+    
+    try context.save()
+    print("База очищена")
+  } catch {
+    print("Ошибка при очистке: \(error)")
+  }
 }
 
 #Preview {

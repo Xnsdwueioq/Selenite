@@ -37,7 +37,7 @@ final class Period {
   var title: String
   var fragmentedType: FragmentedType
   var targetDuration: TimeInterval?
-
+  
   @Relationship(deleteRule: .cascade)
   var intervals: [PeriodInterval]
   
