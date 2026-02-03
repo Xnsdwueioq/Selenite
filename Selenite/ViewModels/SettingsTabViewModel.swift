@@ -53,7 +53,7 @@ final class SettingsTabViewModel {
   private func sheduleSave() {
     saveTask?.cancel()
     saveTask = Task {
-      try? await Task.sleep(for: .seconds(0.5))
+      try? await Task.sleep(for: .seconds(1))
       
       if !Task.isCancelled {
         await MainActor.run {
