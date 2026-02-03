@@ -73,7 +73,7 @@ final class TimerManager {
     
     switch periodType {
     case .session:
-      sessionTitle = defaultTitle
+      sessionTitle = settingsManager.sessionTitle
       sessionDuration = settingsManager.sessionDuration
     case .shortBreak:
       sessionTitle = breakTitle
