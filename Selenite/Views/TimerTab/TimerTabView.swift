@@ -21,18 +21,17 @@ struct TimerTabView: View {
           "Название",
           text: Binding(
             get: {
-              settingsVM.sessionTitle
+              timerManager.getTitle()
             },
             set: { newValue in
-              let newTitle = newValue != "" ? newValue : "Selenite"
-              settingsVM.sessionTitle = newTitle
+              settingsVM.sessionTitle = newValue
             }
           )
         )
         .padding(.horizontal, 50)
         .font(.title2)
         .multilineTextAlignment(.center)
-        .disabled(false)
+        .disabled(timerManager.getDisableCondition())
         
         // TIMER
         Text(timerManager.remainingTime())

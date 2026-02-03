@@ -72,7 +72,7 @@ final class SettingsManager {
     
     saveTask?.cancel()
     saveTask = Task {
-      try? await Task.sleep(for: .seconds(1))
+      try? await Task.sleep(for: .seconds(2))
       
       if !Task.isCancelled {
         await MainActor.run {

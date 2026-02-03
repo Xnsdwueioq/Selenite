@@ -19,7 +19,10 @@ final class SettingsViewModel {
   // MARK: - Computed Properties
   var sessionTitle: String {
     get { settingsManager.sessionTitle }
-    set { settingsManager.sessionTitle = newValue }
+    set {
+      let newTitle = (newValue != "") ? newValue : "Selenite"
+      settingsManager.sessionTitle = newTitle
+    }
   }
   
   var sessionDuration: Double {

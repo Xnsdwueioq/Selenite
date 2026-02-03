@@ -76,7 +76,7 @@ final class Period {
   }
   
   
-  init(title: String = "", fragmentedType: FragmentedType = FragmentedType.undetermined, targetDuration: TimeInterval? = nil, intervals: [PeriodInterval] = []) {
+  init(title: String = "Selenite", fragmentedType: FragmentedType = FragmentedType.undetermined, targetDuration: TimeInterval? = nil, intervals: [PeriodInterval] = []) {
     self.title = title
     self.targetDuration = targetDuration
     self.fragmentedType = fragmentedType

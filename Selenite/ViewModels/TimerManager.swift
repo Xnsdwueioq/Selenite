@@ -39,7 +39,7 @@ final class TimerManager {
   
   private var activePeriod: Period?
   var periodState: PeriodState = .idle
-  private var periodType: PeriodType = .session
+  var periodType: PeriodType = .session
   
   init(settingsManager: SettingsManager = .shared, modelContext: ModelContext? = nil) {
     self.settingsManager = settingsManager
@@ -66,13 +66,14 @@ final class TimerManager {
   
   func createPeriod() {
     let breakTitle = "Перерыв"
+    let defaultTitle = "Selenite"
     
     var sessionTitle: String
     var sessionDuration: Int
     
     switch periodType {
     case .session:
-      sessionTitle = "Selenite"
+      sessionTitle = defaultTitle
       sessionDuration = settingsManager.sessionDuration
     case .shortBreak:
       sessionTitle = breakTitle
@@ -307,6 +308,31 @@ final class TimerManager {
   
   // MARK: - View Logic
   
+  // MARK: Title
+  func getTitle() -> String {
+    let breakTitle = "Перерыв"
+    let defaultTitle = "Selenite"
+    
+    switch periodType {
+    case .session:
+      if periodState != .idle {
+        return activePeriod?.title ?? defaultTitle
+      } else {
+        return settingsManager.sessionTitle
+      }
+      
+    case .shortBreak, .longBreak:
+      return breakTitle
+    }
+  }
+  
+  func getDisableCondition() -> Bool {
+    if (periodState == .active) || (periodType != .session) {
+      return true
+    }
+    return false
+  }
+  
   // MARK: Time Formatting
   private static let timeFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
@@ -400,7 +426,6 @@ final class TimerManager {
   func getCurrentSessionIndicator() -> SessionIndicator {
     return currentSessionIndicator
   }
-  
   
   // MARK: - Debug Module
   func printData(with message: String) {
