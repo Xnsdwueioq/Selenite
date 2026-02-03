@@ -15,6 +15,12 @@ final class SettingsManager {
   
   private let store = NSUbiquitousKeyValueStore.default
   
+  var sessionTitle: String = "Selenite" {
+    didSet {
+      saveToCloud(value: sessionTitle, key: Keys.sessionTitle)
+    }
+  }
+  
   var sessionDuration: Int = 25 {
     didSet {
       saveToCloud(value: sessionDuration, key: Keys.sessionDuration)
@@ -65,6 +71,10 @@ final class SettingsManager {
   }
   
   private func loadFromCloud() {
+    if let value = store.string(forKey: Keys.sessionTitle) {
+      sessionTitle = value
+    }
+    
     if let value = getInt(for: Keys.sessionDuration) { sessionDuration = value }
     if let value = getInt(for: Keys.sessionCount) { sessionCount = value }
     
@@ -88,6 +98,8 @@ final class SettingsManager {
       store.set(Int64(intValue), forKey: key)
     } else if let boolValue = value as? Bool, store.bool(forKey: key) != boolValue {
       store.set(boolValue, forKey: key)
+    } else if let stringValue = value as? String, store.string(forKey: key) != stringValue {
+      store.set(stringValue, forKey: key)
     }
     // DEBUG
     NSLog("~\(UIDevice.current.name) saveToCloud \(value)")
@@ -110,6 +122,7 @@ final class SettingsManager {
   }
   
   private enum Keys {
+    static let sessionTitle = "sessionTitle"
     static let sessionDuration = "sessionDuration"
     static let sessionCount = "sessionCount"
     static let sessionAutostart = "sessionAutostart"
