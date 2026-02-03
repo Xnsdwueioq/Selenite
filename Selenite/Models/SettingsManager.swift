@@ -14,49 +14,44 @@ final class SettingsManager {
   static let shared = SettingsManager()
   
   private let store = NSUbiquitousKeyValueStore.default
+  private var saveTask: Task<Void, Never>?
+  private var isUpdatingFromCloud = false
+  
+  // MARK: - Properties
   
   var sessionTitle: String = "Selenite" {
-    didSet {
-      saveToCloud(value: sessionTitle, key: Keys.sessionTitle)
-    }
+    didSet { scheduleCloudSync() }
   }
   
   var sessionDuration: Int = 25 {
-    didSet {
-      saveToCloud(value: sessionDuration, key: Keys.sessionDuration)
-    }
+    didSet { scheduleCloudSync() }
   }
+  
   var sessionCount: Int = 4 {
-    didSet {
-      saveToCloud(value: sessionCount, key: Keys.sessionCount)
-    }
+    didSet { scheduleCloudSync() }
   }
+  
   var sessionAutostart: Bool = false {
-    didSet {
-      saveToCloud(value: sessionAutostart, key: Keys.sessionAutostart)
-    }
+    didSet { scheduleCloudSync() }
   }
   
   var areBreaksDisabled: Bool = false {
-    didSet {
-      saveToCloud(value: areBreaksDisabled, key: Keys.areBreaksDisabled)
-    }
+    didSet { scheduleCloudSync() }
   }
+  
   var shortBreakDuration: Int = 5 {
-    didSet {
-      saveToCloud(value: shortBreakDuration, key: Keys.shortBreakDuration)
-    }
+    didSet { scheduleCloudSync() }
   }
+  
   var longBreakDuration: Int = 30 {
-    didSet {
-      saveToCloud(value: longBreakDuration, key: Keys.longBreakDuration)
-    }
+    didSet { scheduleCloudSync() }
   }
+  
   var breakAutostart: Bool = false {
-    didSet {
-      saveToCloud(value: breakAutostart, key: Keys.breakAutostart)
-    }
+    didSet { scheduleCloudSync() }
   }
+  
+  // MARK: - Init
   
   private init() {
     loadFromCloud()
@@ -70,10 +65,45 @@ final class SettingsManager {
     )
   }
   
-  private func loadFromCloud() {
-    if let value = store.string(forKey: Keys.sessionTitle) {
-      sessionTitle = value
+  // MARK: - Logic
+  
+  private func scheduleCloudSync() {
+    guard !isUpdatingFromCloud else { return }
+    
+    saveTask?.cancel()
+    saveTask = Task {
+      try? await Task.sleep(for: .seconds(1))
+      
+      if !Task.isCancelled {
+        await MainActor.run {
+          performCloudSave()
+        }
+      }
     }
+  }
+  
+  @MainActor
+  private func performCloudSave() {
+    saveToCloud(value: sessionTitle, key: Keys.sessionTitle)
+    saveToCloud(value: sessionDuration, key: Keys.sessionDuration)
+    saveToCloud(value: sessionCount, key: Keys.sessionCount)
+    saveToCloud(value: sessionAutostart, key: Keys.sessionAutostart)
+    
+    saveToCloud(value: areBreaksDisabled, key: Keys.areBreaksDisabled)
+    saveToCloud(value: shortBreakDuration, key: Keys.shortBreakDuration)
+    saveToCloud(value: longBreakDuration, key: Keys.longBreakDuration)
+    saveToCloud(value: breakAutostart, key: Keys.breakAutostart)
+    
+    store.synchronize()
+    NSLog("~\(UIDevice.current.name) Cloud Sync Completed")
+  }
+  
+  
+  private func loadFromCloud() {
+    isUpdatingFromCloud = true
+    defer { isUpdatingFromCloud = false }
+    
+    if let value = store.string(forKey: Keys.sessionTitle) { sessionTitle = value }
     
     if let value = getInt(for: Keys.sessionDuration) { sessionDuration = value }
     if let value = getInt(for: Keys.sessionCount) { sessionCount = value }
@@ -91,6 +121,8 @@ final class SettingsManager {
     if store.object(forKey: Keys.breakAutostart) != nil {
       breakAutostart = store.bool(forKey: Keys.breakAutostart)
     }
+    
+    NSLog("~\(UIDevice.current.name) loadFromCloud finished")
   }
   
   private func saveToCloud(value: Any, key: String) {
@@ -103,7 +135,6 @@ final class SettingsManager {
     }
     // DEBUG
     NSLog("~\(UIDevice.current.name) saveToCloud \(value)")
-    store.synchronize()
   }
   
   private func getInt(for key: String) -> Int? {

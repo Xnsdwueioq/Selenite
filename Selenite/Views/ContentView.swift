@@ -28,6 +28,7 @@ enum AppTab: Identifiable {
 struct ContentView: View {
   @Environment(\.modelContext) private var modelContext
   @State private var timerManager = TimerManager(settingsManager: .shared)
+  @State private var settingsVM = SettingsViewModel(settingsManager: .shared)
   @State private var selectedTab = AppTab.timer
   
   var body: some View {
@@ -54,6 +55,7 @@ struct ContentView: View {
       })
     }
     .environment(timerManager)
+    .environment(settingsVM)
     .onAppear {
       timerManager.modelContext = modelContext
     }
@@ -74,5 +76,6 @@ struct ContentView: View {
   ContentView()
     .modelContainer(container)
     .environment(previewManager)
+    .environment(SettingsViewModel(settingsManager: .shared))
     .tint(.purpleBrand)
 }

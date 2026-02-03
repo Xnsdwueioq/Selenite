@@ -10,20 +10,21 @@ import SwiftData
 
 struct SettingsTabView: View {
   @Environment(TimerManager.self) private var timerManager
-  @State private var settingsVM = SettingsTabViewModel(settingsManager: SettingsManager.shared)
+  @Environment(SettingsViewModel.self) private var settingsVM
   
-  private var sessionCountBinding: Binding<Double> {
+  private var sessionCountWithLimits: Binding<Double> {
     Binding(
       get: { settingsVM.sessionCount },
       set: { newValue in
         let minAllowed = Double(timerManager.getCurrentSessionNumber())
-        // Валидация: не даем упасть ниже текущей сессии
         settingsVM.sessionCount = max(newValue, minAllowed)
       }
     )
   }
   
   var body: some View {
+    @Bindable var settingsVM = settingsVM
+    
     NavigationStack {
       List {
         Section("Сессия") {
@@ -37,7 +38,7 @@ struct SettingsTabView: View {
             }
             
             Slider(
-              value: sessionCountBinding,
+              value: sessionCountWithLimits,
               in: 1...10,
               step: 1,
               label: {
@@ -104,5 +105,6 @@ struct ToggleParameterView: View {
   SettingsTabView()
     .modelContainer(for: [Period.self, PeriodInterval.self])
     .environment(TimerManager(settingsManager: SettingsManager.shared))
+    .environment(SettingsViewModel(settingsManager: .shared))
     .tint(.purple.mix(with: .red, by: 0.6))
 }

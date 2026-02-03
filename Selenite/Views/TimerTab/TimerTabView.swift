@@ -10,18 +10,29 @@ import SwiftData
 
 struct TimerTabView: View {
   @Environment(TimerManager.self) private var timerManager
-  @State private var title = "Selenite"
+  @Environment(SettingsViewModel.self) private var settingsVM
   
   var body: some View {
     let _ = timerManager.pulse
     NavigationStack {
       VStack(spacing: 5) {
         // TEXTFIELD
-        TextField("Название", text: $title)
-          .padding(.horizontal, 50)
-          .font(.title2)
-          .multilineTextAlignment(.center)
-          .disabled(false)
+        TextField(
+          "Название",
+          text: Binding(
+            get: {
+              settingsVM.sessionTitle
+            },
+            set: { newValue in
+              let newTitle = newValue != "" ? newValue : "Selenite"
+              settingsVM.sessionTitle = newValue
+            }
+          )
+        )
+        .padding(.horizontal, 50)
+        .font(.title2)
+        .multilineTextAlignment(.center)
+        .disabled(false)
         
         // TIMER
         Text(timerManager.remainingTime())
@@ -35,7 +46,7 @@ struct TimerTabView: View {
           }) {
             Image(systemName: "chevron.left")
           }
-   
+          
           // PLAY/PAUSE BUTTON
           Button(action: {
             timerManager.playButtonAction()
@@ -90,5 +101,6 @@ struct TimerTabView: View {
   TimerTabView()
     .modelContainer(container)
     .environment(previewManager)
+    .environment(SettingsViewModel(settingsManager: .shared))
     .tint(.purpleBrand)
 }
