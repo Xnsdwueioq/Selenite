@@ -66,7 +66,6 @@ final class TimerManager {
   
   func createPeriod() {
     let breakTitle = "Перерыв"
-    let defaultTitle = "Selenite"
     
     var sessionTitle: String
     var sessionDuration: Int
