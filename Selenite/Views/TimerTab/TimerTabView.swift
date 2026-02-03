@@ -25,7 +25,7 @@ struct TimerTabView: View {
             },
             set: { newValue in
               let newTitle = newValue != "" ? newValue : "Selenite"
-              settingsVM.sessionTitle = newValue
+              settingsVM.sessionTitle = newTitle
             }
           )
         )
