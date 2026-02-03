@@ -10,7 +10,7 @@ import SwiftData
 
 struct SettingsTabView: View {
   @Environment(TimerManager.self) private var timerManager
-  @State private var settingsVM = SettingsViewModel(settingsManager: SettingsManager.shared)
+  @State private var settingsVM = SettingsTabViewModel(settingsManager: SettingsManager.shared)
   
   private var sessionCountBinding: Binding<Double> {
     Binding(

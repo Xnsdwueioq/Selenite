@@ -1,5 +1,5 @@
 //
-//  TimerView.swift
+//  TimerTabView.swift
 //  Selenite
 //
 //  Created by Eyhciurmrn Zmpodackrl on 29.01.2026.
@@ -16,11 +16,13 @@ struct TimerTabView: View {
     let _ = timerManager.pulse
     NavigationStack {
       VStack(spacing: 5) {
+        // TEXTFIELD
         TextField("Название", text: $title)
-          .textFieldStyle(.roundedBorder)
           .padding(.horizontal, 50)
           .font(.title2)
           .multilineTextAlignment(.center)
+          .disabled(false)
+        
         // TIMER
         Text(timerManager.remainingTime())
           .font(.system(size: 82))

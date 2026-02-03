@@ -1,5 +1,5 @@
 //
-//  SettingsViewModel.swift
+//  SettingsTabViewModel.swift
 //  Selenite
 //
 //  Created by Eyhciurmrn Zmpodackrl on 30.01.2026.
@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 @Observable
-final class SettingsViewModel {
+final class SettingsTabViewModel {
   private let settingsManager: SettingsManager
   
   var sessionDuration: Double { didSet { sheduleSave() } }
