@@ -42,7 +42,6 @@ struct ContentView: View {
       // MARK: Timer Tab
       Tab(value: AppTab.timer, content: {
         TimerTabView()
-          .environment(timerManager)
       }, label: {
         Image(systemName: AppTab.timer.systemImage)
       })
@@ -54,6 +53,7 @@ struct ContentView: View {
         Image(systemName: AppTab.settings.systemImage)
       })
     }
+    .environment(timerManager)
     .onAppear {
       timerManager.modelContext = modelContext
     }

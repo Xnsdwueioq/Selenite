@@ -9,7 +9,19 @@ import SwiftUI
 import SwiftData
 
 struct SettingsTabView: View {
+  @Environment(TimerManager.self) private var timerManager
   @State private var settingsVM = SettingsViewModel(settingsManager: SettingsManager.shared)
+  
+  private var sessionCountBinding: Binding<Double> {
+    Binding(
+      get: { settingsVM.sessionCount },
+      set: { newValue in
+        let minAllowed = Double(timerManager.getCurrentSessionNumber())
+        // Валидация: не даем упасть ниже текущей сессии
+        settingsVM.sessionCount = max(newValue, minAllowed)
+      }
+    )
+  }
   
   var body: some View {
     NavigationStack {
@@ -23,8 +35,9 @@ struct SettingsTabView: View {
               Text(String(Int(settingsVM.sessionCount)))
                 .foregroundStyle(.secondary)
             }
+            
             Slider(
-              value: $settingsVM.sessionCount,
+              value: sessionCountBinding,
               in: 1...10,
               step: 1,
               label: {

@@ -10,54 +10,65 @@ import SwiftData
 
 struct TimerTabView: View {
   @Environment(TimerManager.self) private var timerManager
+  @State private var title = "Selenite"
   
   var body: some View {
     let _ = timerManager.pulse
-    VStack(spacing: 5) {
-      // RESTART BUTTON
-      Button(action: {
-        timerManager.resetButtonAction()
-      }) {
-        Image(systemName: "arrow.counterclockwise.circle.fill")
-      }
-      .buttonStyle(.glassProminent)
-      .buttonBorderShape(.circle)
-      .controlSize(.extraLarge)
-      
-      // TIMER
-      Text(timerManager.remainingTime())
-        .font(.system(size: 82))
-        .fontWeight(.medium)
-      
-      HStack {
-        // PREV BUTTON
-        Button(action: {
-          timerManager.previousButtonAction()
-        }) {
-          Image(systemName: "chevron.left")
+    NavigationStack {
+      VStack(spacing: 5) {
+        TextField("Название", text: $title)
+          .textFieldStyle(.roundedBorder)
+          .padding(.horizontal, 50)
+          .font(.title2)
+          .multilineTextAlignment(.center)
+        // TIMER
+        Text(timerManager.remainingTime())
+          .font(.system(size: 82))
+          .fontWeight(.medium)
+        
+        HStack {
+          // PREV BUTTON
+          Button(action: {
+            timerManager.previousButtonAction()
+          }) {
+            Image(systemName: "chevron.left")
+          }
+   
+          // PLAY/PAUSE BUTTON
+          Button(action: {
+            timerManager.playButtonAction()
+          }) {
+            Image(systemName: timerManager.playButtonSystemImage())
+              .animation(.none, value: timerManager.periodState)
+          }
+          .buttonStyle(.glassProminent)
+          .buttonBorderShape(.circle)
+          .controlSize(.extraLarge)
+          
+          // NEXT BUTTON
+          Button(action: {
+            timerManager.nextButtonAction()
+          }) {
+            Image(systemName: "chevron.right")
+          }
         }
         
-        // PLAY/PAUSE BUTTON
-        Button(action: {
-          timerManager.playButtonAction()
-        }) {
-          Image(systemName: timerManager.playButtonSystemImage())
-            .animation(.none, value: timerManager.periodState)
-        }
-        .buttonStyle(.glassProminent)
-        .buttonBorderShape(.circle)
-        .controlSize(.extraLarge)
-        
-        // NEXT BUTTON
-        Button(action: {
-          timerManager.nextButtonAction()
-        }) {
-          Image(systemName: "chevron.right")
-        }
+        // INDICATORS
+        SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
       }
-      
-      // INDICATORS
-      SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing, content: {
+          // RESTART BUTTON
+          Button(action: {
+            timerManager.resetButtonAction()
+          }) {
+            Image(systemName: "arrow.counterclockwise.circle.fill")
+          }
+          .buttonStyle(.glass)
+          .buttonBorderShape(.circle)
+        })
+        .sharedBackgroundVisibility(.hidden)
+      }
     }
   }
 }
