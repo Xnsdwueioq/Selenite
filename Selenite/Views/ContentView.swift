@@ -57,7 +57,6 @@ struct ContentView: View {
     .onAppear {
       timerManager.modelContext = modelContext
     }
-    .tint(.purple.mix(with: .red, by: 0.6))
   }
 }
 
@@ -75,4 +74,5 @@ struct ContentView: View {
   ContentView()
     .modelContainer(container)
     .environment(previewManager)
+    .tint(.purpleBrand)
 }

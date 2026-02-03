@@ -13,6 +13,7 @@ struct SeleniteApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .tint(.purpleBrand)
     }
     .modelContainer(for: [Period.self, PeriodInterval.self])
   }

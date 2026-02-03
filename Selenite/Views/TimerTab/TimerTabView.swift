@@ -77,5 +77,5 @@ struct TimerTabView: View {
   TimerTabView()
     .modelContainer(container)
     .environment(previewManager)
-    .tint(.purple.mix(with: .red, by: 0.6))
+    .tint(.purpleBrand)
 }
