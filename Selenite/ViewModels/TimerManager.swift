@@ -327,7 +327,7 @@ final class TimerManager {
   }
   
   func getDisableCondition() -> Bool {
-    if (periodState == .active) || (periodType != .session) {
+    if (periodState != .idle) || (periodType != .session) {
       return true
     }
     return false
