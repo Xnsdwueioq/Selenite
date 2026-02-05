@@ -28,8 +28,9 @@ struct TimerTabView: View {
             }
           )
         )
-        .padding(.horizontal, 50)
         .font(.title2)
+        .padding(.horizontal, 50)
+        .autocorrectionDisabled()
         .multilineTextAlignment(.center)
         .disabled(timerManager.getDisableCondition())
         

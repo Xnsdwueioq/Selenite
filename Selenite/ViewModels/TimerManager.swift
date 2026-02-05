@@ -67,12 +67,16 @@ final class TimerManager {
   func createPeriod() {
     let breakTitle = "Перерыв"
     
+    let sessionSettingsTitle = settingsManager.sessionTitle
+    let sessionDefaultTitle = "Selenite"
+    let sessionValidatedTitle = sessionSettingsTitle.isEmpty ? sessionDefaultTitle : sessionSettingsTitle
+    
     var sessionTitle: String
     var sessionDuration: Int
     
     switch periodType {
     case .session:
-      sessionTitle = settingsManager.sessionTitle
+      sessionTitle = sessionValidatedTitle
       sessionDuration = settingsManager.sessionDuration
     case .shortBreak:
       sessionTitle = breakTitle
