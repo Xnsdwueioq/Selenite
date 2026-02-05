@@ -27,8 +27,8 @@ struct SessionProgressView: View {
   func color(for index: Int) -> Color {
     if index < current { return .purpleBrand }
     else if (index == current) && (sessionIndicator == .finished) { return .purpleBrand }
-    else if (index == current) && (sessionIndicator == .didStarted) { return .purpleBrand.opacity(0.3) }
-    else { return .gray.opacity(0.2) }
+    else if (index == current) && (sessionIndicator == .didStarted) { return .purpleBrand.opacity(0.35) }
+    else { return .gray.opacity(0.1) }
   }
 }
 

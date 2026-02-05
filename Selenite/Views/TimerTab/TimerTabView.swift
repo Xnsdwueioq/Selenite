@@ -28,9 +28,11 @@ struct TimerTabView: View {
             set: { newValue in
               settingsVM.sessionTitle = newValue
             }
-          )
+          ),
+          prompt:
+            Text("Selenite")
         )
-        .font(.title2)
+        .font(.title)
         .padding(.horizontal, 50)
         .autocorrectionDisabled()
         .multilineTextAlignment(.center)
@@ -41,35 +43,41 @@ struct TimerTabView: View {
           .font(.system(size: 82))
           .fontWeight(.medium)
         
-        HStack {
-          // PREV BUTTON
-          Button(action: {
-            timerManager.previousButtonAction()
-          }) {
-            Image(systemName: "chevron.left")
-          }
+        VStack(spacing: 20) {
+          // INDICATORS
+          SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
+            .animation(.easeInOut(duration: 0.2), value: timerManager.currentSessionIndicator)
           
-          // PLAY/PAUSE BUTTON
-          Button(action: {
-            timerManager.playButtonAction()
-          }) {
-            Image(systemName: timerManager.playButtonSystemImage())
-              .animation(.none, value: timerManager.periodState)
-          }
-          .buttonStyle(.glassProminent)
-          .buttonBorderShape(.circle)
-          .controlSize(.extraLarge)
-          
-          // NEXT BUTTON
-          Button(action: {
-            timerManager.nextButtonAction()
-          }) {
-            Image(systemName: "chevron.right")
+          // PLAY CONTROLS
+          HStack(spacing: 20) {
+            // PREV BUTTON
+            Button(action: {
+              timerManager.previousButtonAction()
+            }) {
+              Image(systemName: "chevron.left")
+                .foregroundStyle(.black)
+            }
+            
+            // PLAY/PAUSE BUTTON
+            Button(action: {
+              timerManager.playButtonAction()
+            }) {
+              Image(systemName: timerManager.playButtonSystemImage())
+                .animation(.none, value: timerManager.periodState)
+            }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.circle)
+            .controlSize(.extraLarge)
+            
+            // NEXT BUTTON
+            Button(action: {
+              timerManager.nextButtonAction()
+            }) {
+              Image(systemName: "chevron.right")
+                .foregroundStyle(.black)
+            }
           }
         }
-        
-        // INDICATORS
-        SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .contentShape(Rectangle())

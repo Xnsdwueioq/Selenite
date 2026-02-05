@@ -49,7 +49,7 @@ final class TimerManager {
   // MARK: - Session
   
   private var currentSessionNumber = 1
-  private var currentSessionIndicator: SessionIndicator = .notStart
+  var currentSessionIndicator: SessionIndicator = .notStart
   
   
   func increaseSessionNumber() {
