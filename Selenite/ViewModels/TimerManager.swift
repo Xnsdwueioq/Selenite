@@ -86,7 +86,7 @@ final class TimerManager {
       sessionDuration = settingsManager.longBreakDuration
     }
     
-    let newPeriod = Period(title: sessionTitle, targetDuration: TimeInterval(sessionDuration))
+    let newPeriod = Period(title: sessionTitle, startDate: Date(), targetDuration: TimeInterval(sessionDuration))
     activePeriod = newPeriod
     
     switch periodType {

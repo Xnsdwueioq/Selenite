@@ -36,6 +36,7 @@ final class PeriodInterval {
 final class Period {
   var title: String
   var fragmentedType: FragmentedType
+  var startDate: Date
   var targetDuration: TimeInterval?
   
   @Relationship(deleteRule: .cascade)
@@ -76,10 +77,22 @@ final class Period {
   }
   
   
-  init(title: String = "Selenite", fragmentedType: FragmentedType = FragmentedType.undetermined, targetDuration: TimeInterval? = nil, intervals: [PeriodInterval] = []) {
+  init(title: String = "Selenite", fragmentedType: FragmentedType = FragmentedType.undetermined, startDate: Date = Date(), targetDuration: TimeInterval? = nil, intervals: [PeriodInterval] = []) {
     self.title = title
     self.targetDuration = targetDuration
     self.fragmentedType = fragmentedType
+    self.startDate = startDate
     self.intervals = intervals
+  }
+}
+
+// MARK: - Extensions
+
+extension Period {
+  var formattedDuration: String {
+    let duration = Duration.seconds(periodDuration)
+    return duration.formatted(
+      .units(allowed: [.hours, .minutes], width: .abbreviated)
+    )
   }
 }

@@ -11,10 +11,21 @@ import SwiftData
 @Observable
 final class SessionListViewModel {
   private var modelContext: ModelContext
-  private var sessions: [Period]
+  var sessions: [Period] = []
   
-  init(modelContext: ModelContext, sessions: [Period] = []) {
+  init(modelContext: ModelContext) {
     self.modelContext = modelContext
-    self.sessions = sessions
+  }
+  
+  // MARK: Fetch
+  func fetchSessions() {
+    do {
+      let descriptor = FetchDescriptor<Period>(sortBy: [SortDescriptor(\.startDate, order: .reverse)])
+      
+      self.sessions = try modelContext.fetch(descriptor)
+      
+    } catch {
+      print("Ошибка загрузки сессий: \(error.localizedDescription)")
+    }
   }
 }
