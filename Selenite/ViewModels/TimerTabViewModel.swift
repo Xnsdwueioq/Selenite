@@ -6,39 +6,50 @@
 //
 
 import Foundation
-
+import UIKit
 
 @Observable
 final class TimerTabViewModel {
   private let settingsManager: SettingsManager
   
-  var sessionTitle: String { didSet { sheduleSave() } }
-  var sessionDuration: Double { didSet { sheduleSave() } }
-  
-  init(settingsManager: SettingsManager) {
+  init(settingsManager: SettingsManager = .shared) {
     self.settingsManager = settingsManager
-    self.sessionTitle = settingsManager.sessionTitle
-    self.sessionDuration = Double(settingsManager.sessionDuration)
   }
   
-  private var saveTask: Task<Void, Never>?
+  // MARK: - Drag Gesture Processing
   
+  private var processedDistance: CGFloat = 0
+  private var lastHeight: CGFloat = 0
+  private let sensitivity: CGFloat = 20
   
-  private func saveAll() {
-    settingsManager.sessionTitle = sessionTitle
-    settingsManager.sessionDuration = Int(sessionDuration)
-  }
-  
-  private func sheduleSave() {
-    saveTask?.cancel()
-    saveTask = Task {
-      try? await Task.sleep(for: .seconds(1))
-      
-      if !Task.isCancelled {
-        await MainActor.run {
-          saveAll()
-        }
-      }
+  func handleDragGesture(with translationHeight: CGFloat, periodType: PeriodType) {
+    let oppositeTranslationHeight = -translationHeight
+    let delta = oppositeTranslationHeight - lastHeight
+    
+    processedDistance += delta
+    
+    if abs(processedDistance) >= sensitivity {
+      updateDuration(by: Int(processedDistance / sensitivity), periodType: periodType)
+      processedDistance = 0
     }
+    lastHeight = oppositeTranslationHeight
+  }
+  
+  private func updateDuration(by minutes: Int, periodType: PeriodType) {
+    switch periodType {
+    case .session:
+      settingsManager.sessionDuration = settingsManager.validation(of: settingsManager.sessionDuration + minutes)
+    case .shortBreak:
+      settingsManager.shortBreakDuration = settingsManager.validation(of: settingsManager.shortBreakDuration + minutes)
+    case .longBreak:
+      settingsManager.longBreakDuration = settingsManager.validation(of: settingsManager.longBreakDuration + minutes)
+    }
+    let generator = UIImpactFeedbackGenerator(style: .soft)
+    generator.impactOccurred()
+  }
+  
+  func endDragGesture() {
+    processedDistance = 0
+    lastHeight = 0
   }
 }

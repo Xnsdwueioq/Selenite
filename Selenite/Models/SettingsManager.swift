@@ -65,7 +65,24 @@ final class SettingsManager {
     )
   }
   
-  // MARK: - Logic
+  // MARK: - Duration Validation
+  
+  private let durationLeftBoundary: Int = 1
+  private let durationRightBoundary: Int = 120
+  private var durationRange: ClosedRange<Int> {
+    durationLeftBoundary...durationRightBoundary
+  }
+  
+  func validation(of duration: Int) -> Int {
+    switch duration {
+    case ...(durationLeftBoundary - 1): return durationLeftBoundary
+    case durationRange: return duration
+    default: return durationRightBoundary
+    }
+  }
+  
+  
+  // MARK: - KVS Logic
   
   private func scheduleCloudSync() {
     guard !isUpdatingFromCloud else { return }

@@ -12,6 +12,8 @@ struct TimerTabView: View {
   @Environment(TimerManager.self) private var timerManager
   @Environment(SettingsViewModel.self) private var settingsVM
   
+  @State private var viewModel = TimerTabViewModel(settingsManager: .shared)
+  
   var body: some View {
     let _ = timerManager.pulse
     NavigationStack {
@@ -69,6 +71,19 @@ struct TimerTabView: View {
         // INDICATORS
         SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
       }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .contentShape(Rectangle())
+      .gesture (
+        DragGesture()
+          .onChanged { value in
+            if timerManager.periodState == .idle {
+              viewModel.handleDragGesture(with: value.translation.height, periodType: timerManager.periodType)
+            }
+          }
+          .onEnded { _ in
+            viewModel.endDragGesture()
+          }
+      )
       .toolbar {
         ToolbarItem(placement: .topBarTrailing, content: {
           // RESTART BUTTON

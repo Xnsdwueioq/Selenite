@@ -81,7 +81,7 @@ struct SliderParameterView: View {
       }
       Slider(
         value: $value,
-        in: 1...100,
+        in: 1...120,
         label: {
           Text(parameterName)
         },
