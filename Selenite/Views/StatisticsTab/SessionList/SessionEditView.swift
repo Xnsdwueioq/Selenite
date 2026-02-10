@@ -8,11 +8,15 @@
 import SwiftUI
 
 struct SessionEditView: View {
+  @Environment(\.modelContext) private var modelContext
+  @Environment(\.dismiss) private var dismiss
+  @State private var viewModel: SessionEditViewModel?
   var session: Period
-  let notEndedTime = "Не завершено"
+  
+  private let notEndedTime = "Не завершено"
   
   var body: some View {
-    List {
+    Form {
       Section {
         VStack(alignment: .leading) {
           Text("Название")
@@ -25,41 +29,64 @@ struct SessionEditView: View {
           Text("Длительность сессии")
             .foregroundStyle(.secondary)
             .font(.footnote)
-          Text(session.formattedDuration)
+          Text(viewModel?.getFormattedDuration() ?? "")
         }
       }
       
-      Section(content: {
-        ForEach(session.intervals) { interval in
-          Section {
-            VStack(alignment: .leading) {
-              Text("Время начала")
-                .foregroundStyle(.secondary)
-                .font(.footnote)
-              Text(interval.startTime.formatted())
-            }
-            
-            VStack(alignment: .leading) {
-              Text("Время конца")
-                .foregroundStyle(.secondary)
-                .font(.footnote)
-              Text(interval.endTime?.formatted() ?? notEndedTime)
-            }
+      
+      
+      List {
+        ForEach(viewModel?.getPeriodDraftIntervals() ?? []) { interval in
+          VStack(alignment: .leading) {
+            Text("Начало интервала")
+              .foregroundStyle(.secondary)
+              .font(.footnote)
+            Text(interval.startTime.formatted())
+          }
+          
+          VStack(alignment: .leading) {
+            Text("Конец интервала")
+              .foregroundStyle(.secondary)
+              .font(.footnote)
+            Text(interval.endTime?.formatted() ?? notEndedTime)
           }
         }
-      }, header: {
-        Text("Интервалы")
-      })
+      }
+    }
+    .toolbar {
+      // Delete session button
+      ToolbarItem(placement: .topBarTrailing) {
+        Button("Удалить", systemImage: "trash", role: .destructive) {
+          viewModel?.deleteSession()
+          dismiss()
+        }
+      }
+      
+      // Save session button
+      ToolbarItem(placement: .topBarTrailing) {
+        Button("Сохранить", systemImage: "checkmark") {
+          viewModel?.saveChanges()
+          dismiss()
+        }
+        .buttonStyle(.glassProminent)
+      }
+    }
+    .onAppear {
+      viewModel = SessionEditViewModel(modelContext: modelContext, session: session)
     }
   }
 }
 
 #Preview {
-  SessionEditView(session: Period(intervals: [
-    PeriodInterval(
-      startTime: Date(),
-      endTime: Date().advanced(by: 120)
-    ),
-    PeriodInterval(startTime: Date().advanced(by: 140), endTime: Date().advanced(by: 2523))
-  ]))
+  NavigationStack {
+    SessionEditView(session: Period(intervals: [
+      PeriodInterval(
+        startTime: Date(),
+        endTime: Date().advanced(by: 120)
+      ),
+      PeriodInterval(startTime: Date().advanced(by: 140), endTime: Date().advanced(by: 2523))
+    ]))
+    .tint(.purpleBrand)
+    
+  }
 }

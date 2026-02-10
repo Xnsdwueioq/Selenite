@@ -13,24 +13,23 @@ struct SessionListView: View {
   @State private var viewModel: SessionListViewModel?
   
   var body: some View {
-    NavigationStack {
-      List {
-        ForEach(viewModel?.sessions ?? []) { session in
-          NavigationLink(value: session) {
-            HStack {
-              Text(session.title)
-              Spacer()
-              Text(session.startDate.formatted())
-                .foregroundStyle(.secondary)
-            }
+    if (viewModel?.sessions.isEmpty ?? true) {
+      ContentUnavailableView("Нет записанных сессий", systemImage: "tray.fill", description: Text("Чтобы начать свою первую сессию запустите таймер"))
+    }
+    List {
+      ForEach(viewModel?.sessions ?? []) { session in
+        NavigationLink(value: AppRoute.sessionEdit(session: session)) {
+          HStack {
+            Text(session.title)
+            Spacer()
+            Text(session.startDate.formatted())
+              .foregroundStyle(.secondary)
           }
         }
       }
-      .navigationTitle("Сессии")
-      .navigationDestination(for: Period.self) { period in
-        SessionEditView(session: period)
-      }
+      
     }
+    .navigationTitle("Сессии")
     .onAppear {
       if viewModel == nil {
         viewModel = SessionListViewModel(modelContext: modelContext)
@@ -50,7 +49,7 @@ struct SessionListView: View {
     let now = Date()
     
     // 1. Короткая сессия (10 минут)
-    let session1 = Period(title: "Изучение Swift", startDate: now.addingTimeInterval(-3600))
+    let session1 = Period(title: "Hi, im business informatic", startDate: now.addingTimeInterval(-3600))
     let interval1 = PeriodInterval(
       startTime: now.addingTimeInterval(-3600),
       endTime: now.addingTimeInterval(-3000)
@@ -59,7 +58,7 @@ struct SessionListView: View {
     session1.fragmentedType = session1.calculateFragmentedType
     
     // 2. Прерванная сессия (два интервала по 15 минут с перерывом)
-    let session2 = Period(title: "Глубокая работа", startDate: now.addingTimeInterval(-7200))
+    let session2 = Period(title: "Daniil Samuhin", startDate: now.addingTimeInterval(-7200))
     let interval2a = PeriodInterval(
       startTime: now.addingTimeInterval(-7200),
       endTime: now.addingTimeInterval(-6300)
@@ -72,7 +71,7 @@ struct SessionListView: View {
     session2.fragmentedType = session2.calculateFragmentedType
     
     // 3. Сессия без названия (проверка заглушки)
-    let session3 = Period(title: "Selenite", startDate: now.addingTimeInterval(-10800))
+    let session3 = Period(title: "Glad to see u", startDate: now.addingTimeInterval(-10800))
     let interval3 = PeriodInterval(
       startTime: now.addingTimeInterval(-10800),
       endTime: now.addingTimeInterval(-9000)

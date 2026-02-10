@@ -8,11 +8,26 @@
 import SwiftUI
 import SwiftData
 
+enum AppRoute: Hashable {
+  case sessionList
+  case sessionEdit(session: Period)
+}
+
 struct StatisticsTabView: View {
   var body: some View {
-    NavigationLink("История сессий", destination: {
-      SessionListView()
-    })
+    NavigationStack {
+      Form {
+        NavigationLink("История сессий", value: AppRoute.sessionList)
+      }
+      .navigationDestination(for: AppRoute.self) { route in
+        switch route {
+        case .sessionList:
+          SessionListView()
+        case .sessionEdit(let session):
+          SessionEditView(session: session)
+        }
+      }
+    }
   }
 }
 
