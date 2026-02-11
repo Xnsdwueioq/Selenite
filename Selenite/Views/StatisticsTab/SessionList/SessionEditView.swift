@@ -13,16 +13,27 @@ struct SessionEditView: View {
   @State private var viewModel: SessionEditViewModel?
   var session: Period
   
+  @State private var showAlert = false
   private let notEndedTime = "Не завершено"
   
   var body: some View {
-    Form {
+    List {
       Section {
         VStack(alignment: .leading) {
           Text("Название")
             .foregroundStyle(.secondary)
             .font(.footnote)
-          Text(session.title.description)
+          TextField(
+            "Название",
+            text: Binding(
+              get: {
+                viewModel?.draftSessionTitle ?? "Selenite"
+              },
+              set: { newTitle in
+                viewModel?.draftSessionTitle = newTitle
+              }),
+            prompt: Text("Selenite")
+          )
         }
         
         VStack(alignment: .leading) {
@@ -33,23 +44,19 @@ struct SessionEditView: View {
         }
       }
       
-      
-      
-      List {
-        ForEach(viewModel?.getPeriodDraftIntervals() ?? []) { interval in
-          VStack(alignment: .leading) {
-            Text("Начало интервала")
-              .foregroundStyle(.secondary)
-              .font(.footnote)
-            Text(interval.startTime.formatted())
-          }
-          
-          VStack(alignment: .leading) {
-            Text("Конец интервала")
-              .foregroundStyle(.secondary)
-              .font(.footnote)
-            Text(interval.endTime?.formatted() ?? notEndedTime)
-          }
+      ForEach(viewModel?.getPeriodDraftIntervals() ?? []) { interval in
+        VStack(alignment: .leading) {
+          Text("Начало интервала")
+            .foregroundStyle(.secondary)
+            .font(.footnote)
+          Text(interval.startTime.formatted())
+        }
+        
+        VStack(alignment: .leading) {
+          Text("Конец интервала")
+            .foregroundStyle(.secondary)
+            .font(.footnote)
+          Text(interval.endTime?.formatted() ?? notEndedTime)
         }
       }
     }
@@ -65,8 +72,11 @@ struct SessionEditView: View {
       // Save session button
       ToolbarItem(placement: .topBarTrailing) {
         Button("Сохранить", systemImage: "checkmark") {
-          viewModel?.saveChanges()
-          dismiss()
+          if viewModel?.saveChanges() ?? false {
+            dismiss()
+          } else {
+            showAlert = true
+          }
         }
         .buttonStyle(.glassProminent)
       }
@@ -74,6 +84,21 @@ struct SessionEditView: View {
     .onAppear {
       viewModel = SessionEditViewModel(modelContext: modelContext, session: session)
     }
+    .alert(
+      "Некорректное название сессии",
+      isPresented: $showAlert,
+      actions: {
+        Button("Ок", role: .cancel) {
+          showAlert = false
+        }
+        Button("Сбросить заголовок", role: .destructive) {
+          viewModel?.resetTitle()
+        }
+      },
+      message: {
+        Text("Название не может состоять только из пробелов или содержать больше 50 символов")
+      }
+    )
   }
 }
 

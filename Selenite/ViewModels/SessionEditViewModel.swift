@@ -66,12 +66,25 @@ final class SessionEditViewModel {
     self.draftSession = PeriodDraft(from: session)
   }
   
+  var draftSessionTitle: String {
+    get {
+      draftSession.title
+    }
+    set {
+      draftSession.title = newValue
+    }
+  }
+  
   func deleteSession() {
     modelContext.delete(session)
   }
   
-  func saveChanges() {
-    session.title = draftSession.title
+  func saveChanges() -> Bool {
+    guard let validTitle = draftSessionTitle.validTitle else {
+      return false
+    }
+    
+    session.title = validTitle
     
     for intervalDraft in draftSession.intervals {
       if let originalInterval = session.intervals.first(where: { $0.persistentModelID == intervalDraft.persistentModelID }) {
@@ -81,6 +94,12 @@ final class SessionEditViewModel {
     }
     
     try? modelContext.save()
+    
+    return true
+  }
+  
+  func resetTitle() {
+    draftSession.title = session.title
   }
   
   func getFormattedDuration() -> String {
