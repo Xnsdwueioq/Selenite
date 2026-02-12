@@ -17,17 +17,15 @@ struct SessionListView: View {
       ContentUnavailableView("Нет записанных сессий", systemImage: "tray.fill", description: Text("Чтобы начать свою первую сессию запустите таймер"))
     }
     List {
-      ForEach(viewModel?.sessions ?? []) { session in
-        NavigationLink(value: AppRoute.sessionEdit(session: session)) {
-          HStack {
-            Text(session.title)
-            Spacer()
-            Text(session.startDate.formatted())
-              .foregroundStyle(.secondary)
+      ForEach(viewModel?.groupedSessions ?? []) { group in
+        Section(content: {
+          ForEach(group.sessions) { session in
+            ListRowView(session: session)
           }
-        }
+        }, header: {
+          Text(group.id.formattedSectionTitle)
+        })
       }
-      
     }
     .navigationTitle("Сессии")
     .onAppear {
@@ -36,6 +34,28 @@ struct SessionListView: View {
       }
       
       viewModel?.fetchSessions()
+    }
+    .toolbar {
+      ToolbarItem(placement: .topBarTrailing) {
+        Button("Очистить все", systemImage: "trash", action: {
+          viewModel?.deleteAll()
+        })
+      }
+    }
+  }
+}
+
+struct ListRowView: View {
+  let session: Period
+  
+  var body: some View {
+    NavigationLink(value: AppRoute.sessionEdit(session: session)) {
+      HStack {
+        Text(session.title)
+        Spacer()
+        Text(session.startDate.formatted())
+          .foregroundStyle(.secondary)
+      }
     }
   }
 }
@@ -79,6 +99,14 @@ struct SessionListView: View {
     session3.intervals = [interval3]
     session3.fragmentedType = session3.calculateFragmentedType
     
+    let session4 = Period(title: "Glad to see u", startDate: now.addingTimeInterval(-220800))
+    let interval4 = PeriodInterval(
+      startTime: now.addingTimeInterval(-250800),
+      endTime: now.addingTimeInterval(-50200)
+    )
+    session4.intervals = [interval4]
+    session4.fragmentedType = session4.calculateFragmentedType
+    context.insert(session4)
     // Вставляем все сессии в контекст
     context.insert(session1)
     context.insert(session2)
