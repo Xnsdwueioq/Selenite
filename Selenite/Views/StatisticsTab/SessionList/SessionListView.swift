@@ -45,20 +45,6 @@ struct SessionListView: View {
   }
 }
 
-struct ListRowView: View {
-  let session: Period
-  
-  var body: some View {
-    NavigationLink(value: AppRoute.sessionEdit(session: session)) {
-      HStack {
-        Text(session.title)
-        Spacer()
-        Text(session.startDate.formatted())
-          .foregroundStyle(.secondary)
-      }
-    }
-  }
-}
 
 #Preview {
   let container: ModelContainer = {

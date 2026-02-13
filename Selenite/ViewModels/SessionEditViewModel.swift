@@ -75,6 +75,20 @@ final class SessionEditViewModel {
     }
   }
   
+  var isChangesSaved: Bool {
+    var isChangesSavedState = draftSession.title == session.title
+    
+    for intervals in zip(draftSession.intervals, session.intervals) {
+      if (intervals.0.startTime == intervals.1.startTime) && (intervals.0.endTime == intervals.1.endTime) {
+        continue
+      } else {
+        isChangesSavedState = false
+      }
+    }
+    
+    return isChangesSavedState
+  }
+  
   func deleteSession() {
     modelContext.delete(session)
   }
