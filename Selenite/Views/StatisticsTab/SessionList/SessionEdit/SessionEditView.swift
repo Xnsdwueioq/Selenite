@@ -97,7 +97,7 @@ struct SessionEditView: View {
     }
   }
   
-  enum ActiveAlert: String {
+  enum ActiveAlert {
     case incorrectTitle
     case deleteSession
     case backWithNoSave
