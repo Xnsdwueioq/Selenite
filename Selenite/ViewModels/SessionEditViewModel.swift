@@ -26,7 +26,7 @@ struct PeriodIntervalDraft: Identifiable {
   }
 }
 
-struct PeriodDraft {
+private struct PeriodDraft {
   var title: String
   var fragmentedType: FragmentedType
   var startDate: Date
@@ -55,16 +55,21 @@ struct PeriodDraft {
 
 @Observable
 final class SessionEditViewModel {
-  private var modelContext: ModelContext
+  private let dataService: PeriodDataService
+  
   private var session: Period
   
-  var draftSession: PeriodDraft
-  
   init(modelContext: ModelContext, session: Period) {
-    self.modelContext = modelContext
+    self.dataService = PeriodDataService(modelContext: modelContext)
+    
     self.session = session
     self.draftSession = PeriodDraft(from: session)
   }
+  
+  
+  // MARK: - Draft Session
+  
+  private var draftSession: PeriodDraft
   
   var draftSessionTitle: String {
     get {
@@ -75,22 +80,34 @@ final class SessionEditViewModel {
     }
   }
   
-  var isChangesSaved: Bool {
-    var isChangesSavedState = draftSession.title == session.title
-    
-    for intervals in zip(draftSession.intervals, session.intervals) {
-      if (intervals.0.startTime == intervals.1.startTime) && (intervals.0.endTime == intervals.1.endTime) {
-        continue
-      } else {
-        isChangesSavedState = false
-      }
-    }
-    
-    return isChangesSavedState
+  func getPeriodDraftIntervals() -> [PeriodIntervalDraft] {
+    return draftSession.intervals
   }
   
+  func resetTitle() {
+    draftSession.title = session.title
+  }
+  
+  var isChangesSaved: Bool {
+    guard draftSession.title == session.title else { return false }
+    guard draftSession.intervals.count == session.intervals.count else { return false }
+    
+    return zip(draftSession.intervals, session.intervals).allSatisfy { draft, original in
+      draft.startTime == original.startTime && draft.endTime == original.endTime
+    }
+  }
+  
+  func getFormattedDuration() -> String {
+    draftSession.formattedDuration
+  }
+  
+  // MARK: - Actions
   func deleteSession() {
-    modelContext.delete(session)
+    do {
+      try dataService.delete(session)
+    } catch {
+      print("Ошибка удаления сессии: \(error.localizedDescription)")
+    }
   }
   
   func saveChanges() -> Bool {
@@ -107,28 +124,17 @@ final class SessionEditViewModel {
       }
     }
     
-    try? modelContext.save()
-    
-    return true
-  }
-  
-  func resetTitle() {
-    draftSession.title = session.title
-  }
-  
-  func getFormattedDuration() -> String {
-    draftSession.formattedDuration
-  }
-  
-  func getPeriodDraftIntervals() -> [PeriodIntervalDraft] {
-    return draftSession.intervals
+    do {
+      try dataService.save()
+      return true
+    } catch {
+      print("Не удалось сохранить изменения: \(error.localizedDescription)")
+      return false
+    }
   }
 }
 
-
-// MARK: - Extensions
-
-extension PeriodDraft {
+private extension PeriodDraft {
   var formattedDuration: String {
     let duration = Duration.seconds(periodDuration)
     return duration.formatted(

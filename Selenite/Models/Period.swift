@@ -85,14 +85,3 @@ final class Period {
     self.intervals = intervals
   }
 }
-
-// MARK: - Extensions
-
-extension Period {
-  var formattedDuration: String {
-    let duration = Duration.seconds(periodDuration)
-    return duration.formatted(
-      .units(allowed: [.hours, .minutes], width: .abbreviated)
-    )
-  }
-}

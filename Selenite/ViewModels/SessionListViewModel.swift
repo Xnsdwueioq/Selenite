@@ -8,14 +8,9 @@
 import Foundation
 import SwiftData
 
-struct DailySessionGroup: Identifiable {
-  let id: Date
-  let sessions: [Period]
-}
-
 @Observable
 final class SessionListViewModel {
-  private var modelContext: ModelContext
+  private let dataService: PeriodDataService
   
   private(set) var groupedSessions: [DailySessionGroup] = []
   var sessions: [Period] = [] {
@@ -25,13 +20,14 @@ final class SessionListViewModel {
   }
   
   init(modelContext: ModelContext) {
-    self.modelContext = modelContext
+    self.dataService = PeriodDataService(modelContext: modelContext)
   }
   
-  func fetchSessions() {
+  // MARK: - Actions
+  
+  func fetchAllSessions() {
     do {
-      let descriptor = FetchDescriptor<Period>(sortBy: [SortDescriptor(\.startDate, order: .reverse)])
-      self.sessions = try modelContext.fetch(descriptor)
+      self.sessions = try dataService.fetchAllSessions()
     } catch {
       print("Ошибка загрузки сессий: \(error.localizedDescription)")
     }
@@ -39,14 +35,15 @@ final class SessionListViewModel {
   
   func deleteAll() {
     do {
-      try modelContext.delete(model: Period.self)
-      try modelContext.save()
-      
+      try dataService.deleteAll()
       sessions = []
     } catch {
       print("Ошибка пакетного удаления: \(error.localizedDescription)")
     }
   }
+  
+  
+  // MARK: - Group Logic
   
   func updateGroupedSessions() {
     let groups = Dictionary(grouping: sessions, by: {
@@ -58,33 +55,9 @@ final class SessionListViewModel {
         DailySessionGroup(id: key, sessions: value)
       }
   }
-}
-
-extension Date {
-  var smartDate: String {
-    let calendar = Calendar.current
-    
-    let isCurrentYear = calendar.component(.year, from: self) == calendar.component(.year, from: Date())
-    
-    if isCurrentYear {
-      return self.formatted(.dateTime.day().month(.abbreviated))
-    } else {
-      return self.formatted(.dateTime.day().month(.abbreviated).year())
-    }
-    
-  }
-}
-
-extension Date {
-  var formattedSectionTitle: String {
-    let calendar = Calendar.current
-    
-    if calendar.isDateInToday(self) {
-      return "Today"
-    } else if calendar.isDateInYesterday(self) {
-      return "Yesterday"
-    } else {
-      return self.smartDate
-    }
+  
+  struct DailySessionGroup: Identifiable {
+    let id: Date
+    let sessions: [Period]
   }
 }

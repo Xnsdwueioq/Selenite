@@ -33,7 +33,7 @@ struct SessionListView: View {
         viewModel = SessionListViewModel(modelContext: modelContext)
       }
       
-      viewModel?.fetchSessions()
+      viewModel?.fetchAllSessions()
     }
     .toolbar {
       ToolbarItem(placement: .topBarTrailing) {
