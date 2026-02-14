@@ -105,14 +105,14 @@ struct SettingsTabView: View {
     var alertTitle: String {
       switch self {
       case .deleteAll:
-        return "Вы уверены, что хотите очистить историю сессий?"
+        return "Очистить историю сессий?"
       }
     }
     
     var alertMessage: String? {
       switch self {
       case .deleteAll:
-        return "Это действие необратимо"
+        return "Все записанные сессии будут удалены безвозвратно."
       }
     }
   }

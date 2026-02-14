@@ -75,7 +75,7 @@ struct SessionEditView: View {
         Button("Вернуть заголовок", role: .destructive) {
           viewModel?.resetTitle()
         }
-        Button("Ок", role: .cancel) { }
+        Button("Отмена", role: .cancel) { }
         
       case .deleteSession:
         Button("Подтвердить", role: .destructive) {
@@ -111,7 +111,7 @@ struct SessionEditView: View {
       case .incorrectTitle:
         return "Некорректное название сессии"
       case .deleteSession:
-        return "Вы уверены, что хотите удалить сессию?"
+        return "Удалить сессию?"
       case .backWithNoSave:
         return "Сохранить данные перед выходом?"
       }
