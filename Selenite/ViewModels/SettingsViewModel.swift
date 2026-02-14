@@ -2,58 +2,26 @@
 //  SettingsViewModel.swift
 //  Selenite
 //
-//  Created by Eyhciurmrn Zmpodackrl on 30.01.2026.
+//  Created by Eyhciurmrn Zmpodackrl on 14.02.2026.
 //
 
 import Foundation
-import UIKit
+import SwiftData
+
 
 @Observable
 final class SettingsViewModel {
-  private let settingsManager: SettingsManager
+  private var dataService: PeriodDataService
   
-  init(settingsManager: SettingsManager = .shared) {
-    self.settingsManager = settingsManager
+  init(modelContext: ModelContext) {
+    self.dataService = PeriodDataService(modelContext: modelContext)
   }
   
-  // MARK: - Computed Properties
-  var sessionTitle: String {
-    get { settingsManager.sessionTitle }
-    set { settingsManager.sessionTitle = newValue }
-  }
-  
-  var sessionDuration: Double {
-    get { Double(settingsManager.sessionDuration) }
-    set { settingsManager.sessionDuration = Int(newValue) }
-  }
-  
-  var sessionCount: Double {
-    get { Double(settingsManager.sessionCount) }
-    set { settingsManager.sessionCount = Int(newValue) }
-  }
-  
-  var sessionAutostart: Bool {
-    get { settingsManager.sessionAutostart }
-    set { settingsManager.sessionAutostart = newValue }
-  }
-  
-  var areBreaksDisabled: Bool {
-    get { settingsManager.areBreaksDisabled }
-    set { settingsManager.areBreaksDisabled = newValue }
-  }
-  
-  var shortBreakDuration: Double {
-    get { Double(settingsManager.shortBreakDuration) }
-    set { settingsManager.shortBreakDuration = Int(newValue) }
-  }
-  
-  var longBreakDuration: Double {
-    get { Double(settingsManager.longBreakDuration) }
-    set { settingsManager.longBreakDuration = Int(newValue) }
-  }
-  
-  var breakAutostart: Bool {
-    get { settingsManager.breakAutostart }
-    set { settingsManager.breakAutostart = newValue }
+  func deleteSessionsHistory() {
+    do {
+      try dataService.deleteAll()
+    } catch {
+      print("Не удалось удалить историю сессий: \(error.localizedDescription)")
+    }
   }
 }

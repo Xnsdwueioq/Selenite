@@ -9,31 +9,34 @@ import SwiftUI
 import SwiftData
 
 struct SettingsTabView: View {
+  @Environment(\.modelContext) private var modelContext
   @Environment(TimerManager.self) private var timerManager
-  @Environment(SettingsViewModel.self) private var settingsVM
+  @Environment(AppSettings.self) private var appSettings
+  @State private var viewModel: SettingsViewModel?
+  @State private var activeAlert: ActiveAlert?
   
   private var sessionCountWithLimits: Binding<Double> {
     Binding(
-      get: { settingsVM.sessionCount },
+      get: { appSettings.sessionCount },
       set: { newValue in
         let minAllowed = Double(timerManager.getCurrentSessionNumber())
-        settingsVM.sessionCount = max(newValue, minAllowed)
+        appSettings.sessionCount = max(newValue, minAllowed)
       }
     )
   }
   
   var body: some View {
-    @Bindable var settingsVM = settingsVM
+    @Bindable var appSettings = appSettings
     
     NavigationStack {
       List {
         Section("Сессия") {
-          SliderParameterView(parameterName: "Продолжительность сессии", value: $settingsVM.sessionDuration)
+          SliderParameterView(parameterName: "Продолжительность сессии", value: $appSettings.sessionDuration)
           VStack {
             HStack {
               Text("Количество сессий")
               Spacer()
-              Text(String(Int(settingsVM.sessionCount)))
+              Text(String(Int(appSettings.sessionCount)))
                 .foregroundStyle(.secondary)
             }
             
@@ -45,24 +48,72 @@ struct SettingsTabView: View {
                 Text("Количество сесий")
               },
               currentValueLabel: {
-                Text(String(settingsVM.sessionCount))
+                Text(String(appSettings.sessionCount))
               }
             )
           }
-          ToggleParameterView(parameterName: "Автоматический старт сессии", value: $settingsVM.sessionAutostart)
+          ToggleParameterView(parameterName: "Автоматический старт сессии", value: $appSettings.sessionAutostart)
         }
         
         Section("Перерывы") {
-          ToggleParameterView(parameterName: "Отключить перерывы", value: $settingsVM.areBreaksDisabled)
-          if !settingsVM.areBreaksDisabled {
-            SliderParameterView(parameterName: "Короткий перерыв", value: $settingsVM.shortBreakDuration)
-            SliderParameterView(parameterName: "Длинный перерыв", value: $settingsVM.longBreakDuration)
-            ToggleParameterView(parameterName: "Автоматический старт перерыва", value: $settingsVM.breakAutostart)
+          ToggleParameterView(parameterName: "Отключить перерывы", value: $appSettings.areBreaksDisabled)
+          if !appSettings.areBreaksDisabled {
+            SliderParameterView(parameterName: "Короткий перерыв", value: $appSettings.shortBreakDuration)
+            SliderParameterView(parameterName: "Длинный перерыв", value: $appSettings.longBreakDuration)
+            ToggleParameterView(parameterName: "Автоматический старт перерыва", value: $appSettings.breakAutostart)
           }
         }
+        Button(
+          "Очистить историю сессий",
+          role: .destructive,
+          action: {
+            activeAlert = .deleteAll
+          }
+        )
       }
-      .animation(.snappy, value: settingsVM.areBreaksDisabled)
+      .animation(.snappy, value: appSettings.areBreaksDisabled)
       .navigationTitle("Настройки")
+      .alert(
+        activeAlert?.alertTitle ?? "",
+        isPresented: Binding(
+          get: { activeAlert != nil },
+          set: { if !$0 { activeAlert = nil } }
+        ),
+        presenting: activeAlert
+      ) { alert in
+        switch alert {
+        case .deleteAll:
+          Button("Подтвердить", role: .destructive) {
+              viewModel?.deleteSessionsHistory()
+          }
+          Button("Отмена", role: .cancel) { }
+        }
+      } message: { alert in
+        if let message = alert.alertMessage {
+          Text(message)
+        }
+      }
+    }
+    .onAppear {
+      viewModel = SettingsViewModel(modelContext: modelContext)
+    }
+  }
+  
+  private enum ActiveAlert {
+    case deleteAll
+    
+    var alertTitle: String {
+      switch self {
+      case .deleteAll:
+        return "Вы уверены, что хотите очистить историю сессий?"
+      }
+    }
+    
+    var alertMessage: String? {
+      switch self {
+      case .deleteAll:
+        return "Это действие необратимо"
+      }
     }
   }
 }
@@ -105,6 +156,6 @@ struct ToggleParameterView: View {
   SettingsTabView()
     .modelContainer(for: [Period.self, PeriodInterval.self])
     .environment(TimerManager(settingsManager: SettingsManager.shared))
-    .environment(SettingsViewModel(settingsManager: .shared))
+    .environment(AppSettings(settingsManager: .shared))
     .tint(.purple.mix(with: .red, by: 0.6))
 }

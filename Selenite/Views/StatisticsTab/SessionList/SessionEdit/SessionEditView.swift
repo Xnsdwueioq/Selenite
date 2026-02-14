@@ -63,37 +63,41 @@ struct SessionEditView: View {
       viewModel = SessionEditViewModel(modelContext: modelContext, session: session)
     }
     .alert(
-        activeAlert?.alertTitle ?? "",
-        isPresented: Binding(
-            get: { activeAlert != nil },
-            set: { if !$0 { activeAlert = nil } }
-        ),
-        presenting: activeAlert
+      activeAlert?.alertTitle ?? "",
+      isPresented: Binding(
+        get: { activeAlert != nil },
+        set: { if !$0 { activeAlert = nil } }
+      ),
+      presenting: activeAlert
     ) { alert in
-        switch alert {
-        case .incorrectTitle:
-            Button("Вернуть заголовок", role: .destructive) {
-                viewModel?.resetTitle()
-            }
-            Button("Ок", role: .cancel) { }
-            
-        case .deleteSession:
-            Button("Подтвердить", role: .destructive) {
-                viewModel?.deleteSession()
-                dismiss()
-            }
-            Button("Отмена", role: .cancel) { }
-            
-        case .backWithNoSave:
-            Button("Подтвердить", role: .destructive) {
-                dismiss()
-            }
-            Button("Отмена", role: .cancel) { }
+      switch alert {
+      case .incorrectTitle:
+        Button("Вернуть заголовок", role: .destructive) {
+          viewModel?.resetTitle()
         }
+        Button("Ок", role: .cancel) { }
+        
+      case .deleteSession:
+        Button("Подтвердить", role: .destructive) {
+          viewModel?.deleteSession()
+          dismiss()
+        }
+        Button("Отмена", role: .cancel) { }
+        
+      case .backWithNoSave:
+        Button("Сохранить", role: .confirm) {
+          let _ = viewModel?.saveChanges()
+          dismiss()
+        }
+        Button("Не сохранять", role: .destructive) {
+          dismiss()
+        }
+        Button("Отмена", role: .cancel) { }
+      }
     } message: { alert in
-        if let message = alert.alertMessage {
-            Text(message)
-        }
+      if let message = alert.alertMessage {
+        Text(message)
+      }
     }
   }
   
@@ -107,9 +111,9 @@ struct SessionEditView: View {
       case .incorrectTitle:
         return "Некорректное название сессии"
       case .deleteSession:
-        return "Вы уверены в том, что хотите удалить сессию?"
+        return "Вы уверены, что хотите удалить сессию?"
       case .backWithNoSave:
-        return "Если продолжить, данные не будут сохранены"
+        return "Сохранить данные перед выходом?"
       }
     }
     

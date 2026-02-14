@@ -16,6 +16,7 @@ struct SessionDurationView: View {
         .foregroundStyle(.secondary)
         .font(.footnote)
       Text(viewModel?.getFormattedDuration() ?? "")
+        .foregroundStyle(.secondary)
     }
   }
 }

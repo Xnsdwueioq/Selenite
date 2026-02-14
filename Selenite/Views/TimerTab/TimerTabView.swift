@@ -10,7 +10,7 @@ import SwiftData
 
 struct TimerTabView: View {
   @Environment(TimerManager.self) private var timerManager
-  @Environment(SettingsViewModel.self) private var settingsVM
+  @Environment(AppSettings.self) private var appSettings
   
   @State private var viewModel = TimerTabViewModel(settingsManager: .shared)
   
@@ -26,7 +26,7 @@ struct TimerTabView: View {
               timerManager.getTitle()
             },
             set: { newValue in
-              settingsVM.sessionTitle = newValue
+              appSettings.sessionTitle = newValue
             }
           ),
           prompt:
@@ -124,6 +124,6 @@ struct TimerTabView: View {
   TimerTabView()
     .modelContainer(container)
     .environment(previewManager)
-    .environment(SettingsViewModel(settingsManager: .shared))
+    .environment(AppSettings(settingsManager: .shared))
     .tint(.purpleBrand)
 }

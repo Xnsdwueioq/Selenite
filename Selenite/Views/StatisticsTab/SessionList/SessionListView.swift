@@ -35,13 +35,6 @@ struct SessionListView: View {
       
       viewModel?.fetchAllSessions()
     }
-    .toolbar {
-      ToolbarItem(placement: .topBarTrailing) {
-        Button("Очистить все", systemImage: "trash", action: {
-          viewModel?.deleteAll()
-        })
-      }
-    }
   }
 }
 
