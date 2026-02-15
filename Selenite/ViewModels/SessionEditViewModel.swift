@@ -72,16 +72,13 @@ final class SessionEditViewModel {
   private var draftSession: PeriodDraft
   
   var draftSessionTitle: String {
-    get {
-      draftSession.title
-    }
-    set {
-      draftSession.title = newValue
-    }
+    get { draftSession.title }
+    set { draftSession.title = newValue }
   }
   
-  func getPeriodDraftIntervals() -> [PeriodIntervalDraft] {
-    return draftSession.intervals
+  var draftIntervals: [PeriodIntervalDraft] {
+    get { draftSession.intervals }
+    set { draftSession.intervals = newValue }
   }
   
   func resetTitle() {

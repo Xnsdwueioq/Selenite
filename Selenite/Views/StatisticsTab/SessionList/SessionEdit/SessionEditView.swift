@@ -23,7 +23,7 @@ struct SessionEditView: View {
         SessionDurationView(viewModel: viewModel)
       }
       
-      SessionIntervalsView(viewModel: viewModel)
+      SessionIntervalsView(viewModelValue: viewModel)
     }
     .navigationTitle("Редактирование")
     .toolbar {
