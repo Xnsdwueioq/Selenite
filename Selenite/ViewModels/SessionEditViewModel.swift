@@ -129,6 +129,23 @@ final class SessionEditViewModel {
       return false
     }
   }
+  
+  
+  // MARK: - Intervals
+  
+  func getDatePickerRange(index: Int, start: Bool) -> ClosedRange<Date> {
+    guard !(index == 0 && start) else { return Date.distantPast...Date.distantFuture }
+    
+    let offsetBetweenBordersInSeconds: TimeInterval = 60
+    if start { // border is endTime of past interval
+      let pastInterval = draftIntervals[index - 1]
+      guard let endTime = pastInterval.endTime else { return Date.distantPast...Date.distantFuture }
+      
+      return (endTime + offsetBetweenBordersInSeconds)...Date.distantFuture
+    } else { // border is startTime of current interval
+      return (draftIntervals[index].startTime + offsetBetweenBordersInSeconds)...Date.distantFuture
+    }
+  }
 }
 
 private extension PeriodDraft {

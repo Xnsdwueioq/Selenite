@@ -16,7 +16,7 @@ struct SessionIntervalsView: View {
     if let viewModelValue {
       @Bindable var viewModel = viewModelValue
       
-      ForEach($viewModel.draftIntervals) { $interval in
+      ForEach(viewModel.draftIntervals.indices, id: \.self) { index in
         Section {
           VStack(alignment: .leading) {
             Text("Начало интервала")
@@ -24,7 +24,8 @@ struct SessionIntervalsView: View {
               .font(.footnote)
             // Text(interval.startTime.formatted())
             DatePicker(
-              selection: $interval.startTime,
+              selection: $viewModel.draftIntervals[index].startTime,
+              in: viewModel.getDatePickerRange(index: index, start: true),
               displayedComponents: [.date, .hourAndMinute]
             ) { EmptyView() }
           }
@@ -33,12 +34,13 @@ struct SessionIntervalsView: View {
             Text("Конец интервала")
               .foregroundStyle(.secondary)
               .font(.footnote)
-            if let _ = interval.endTime {
+            if let _ = viewModel.draftIntervals[index].endTime {
               DatePicker(
                 selection: Binding(
-                  get: { interval.endTime ?? Date() },
-                  set: { interval.endTime = $0 }
+                  get: { viewModel.draftIntervals[index].endTime ?? Date() },
+                  set: { viewModel.draftIntervals[index].endTime = $0 }
                 ),
+                in: viewModel.getDatePickerRange(index: index, start: false),
                 displayedComponents: [.date, .hourAndMinute]
               ) { EmptyView() }
             } else {
