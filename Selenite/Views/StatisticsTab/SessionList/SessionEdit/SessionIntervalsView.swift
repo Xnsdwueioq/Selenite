@@ -22,7 +22,6 @@ struct SessionIntervalsView: View {
             Text("Начало интервала")
               .foregroundStyle(.secondary)
               .font(.footnote)
-            // Text(interval.startTime.formatted())
             DatePicker(
               selection: $viewModel.draftIntervals[index].startTime,
               in: viewModel.getDatePickerRange(index: index, start: true),
@@ -48,6 +47,9 @@ struct SessionIntervalsView: View {
              }
           }
         }
+      }
+      .onAppear {
+        viewModel.printDraftIntervals()
       }
     } else {
       ContentUnavailableView("Не удалось загрузить данные о сессии", systemImage: "archivebox")

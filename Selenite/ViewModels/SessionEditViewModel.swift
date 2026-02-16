@@ -78,7 +78,12 @@ final class SessionEditViewModel {
   
   var draftIntervals: [PeriodIntervalDraft] {
     get { draftSession.intervals }
-    set { draftSession.intervals = newValue }
+    set {
+      draftSession.intervals = newValue
+      validateIntervalChain()
+      
+      printDraftIntervals()
+    }
   }
   
   func resetTitle() {
@@ -136,14 +141,43 @@ final class SessionEditViewModel {
   func getDatePickerRange(index: Int, start: Bool) -> ClosedRange<Date> {
     guard !(index == 0 && start) else { return Date.distantPast...Date.distantFuture }
     
-    let offsetBetweenBordersInSeconds: TimeInterval = 60
+    let offset: TimeInterval = 60
     if start { // border is endTime of past interval
       let pastInterval = draftIntervals[index - 1]
       guard let endTime = pastInterval.endTime else { return Date.distantPast...Date.distantFuture }
       
-      return (endTime + offsetBetweenBordersInSeconds)...Date.distantFuture
+      return endTime...Date.distantFuture
     } else { // border is startTime of current interval
-      return (draftIntervals[index].startTime + offsetBetweenBordersInSeconds)...Date.distantFuture
+      return (draftIntervals[index].startTime + offset)...Date.distantFuture
+    }
+  }
+  
+  private func validateIntervalChain() {
+    let offset: TimeInterval = 60
+    
+    for i in 0..<draftSession.intervals.count {
+      if let currentEnd = draftSession.intervals[i].endTime {
+        if currentEnd < draftSession.intervals[i].startTime + offset {
+          draftSession.intervals[i].endTime = draftSession.intervals[i].startTime + offset
+        }
+      }
+      
+      let nextIndex = i + 1
+      if nextIndex < draftSession.intervals.count {
+        if let currentEnd = draftSession.intervals[i].endTime {
+          if draftSession.intervals[nextIndex].startTime < currentEnd {
+            draftSession.intervals[nextIndex].startTime = currentEnd
+          }
+        }
+      }
+    }
+  }
+  
+  // DEBUG
+  func printDraftIntervals() {
+    print("DRAFT INTERVALS HAS CHANGED \(Date().formatted(.dateTime.second()))")
+    for (index, interval) in draftIntervals.enumerated() {
+      print("\(index + 1) interval: \(interval.startTime) — \(interval.endTime ?? Date())")
     }
   }
 }
