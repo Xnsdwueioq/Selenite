@@ -67,6 +67,5 @@ struct SessionIntervalsView: View {
       PeriodInterval(startTime: Date().advanced(by: 140), endTime: Date().advanced(by: 2523))
     ]))
     .tint(.purpleBrand)
-    
   }
 }

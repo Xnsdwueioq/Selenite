@@ -46,7 +46,7 @@ final class SessionListViewModel {
   // MARK: - Group Logic
   
   func updateGroupedSessions() {
-    let groups = Dictionary(grouping: sessions, by: {
+    let groups = Dictionary(grouping: sessions.filter { $0.fragmentedType != .undetermined }, by: {
       Calendar.current.startOfDay(for: $0.startDate)
     })
     self.groupedSessions = groups
