@@ -138,27 +138,54 @@ final class SessionEditViewModel {
   
   // MARK: - Intervals
   
+  let intervalOffset: TimeInterval = 1
+  
   func getDatePickerRange(index: Int, start: Bool) -> ClosedRange<Date> {
     guard !(index == 0 && start) else { return Date.distantPast...Date.distantFuture }
     
-    let offset: TimeInterval = 60
     if start { // border is endTime of past interval
       let pastInterval = draftIntervals[index - 1]
       guard let endTime = pastInterval.endTime else { return Date.distantPast...Date.distantFuture }
       
       return endTime...Date.distantFuture
     } else { // border is startTime of current interval
-      return (draftIntervals[index].startTime + offset)...Date.distantFuture
+      return (draftIntervals[index].startTime + intervalOffset)...Date.distantFuture
     }
   }
   
+  func getSecondsPickerRange(index: Int, start: Bool) -> Range<Int> {
+    guard !(index == 0 && start) else { return 0..<60 }
+
+    let standartRange = 0..<60
+    let currentInterval = draftIntervals[index]
+    let pastInterval = draftIntervals[index - 1]
+
+    var isEqual: Bool
+    var limit: Int
+    
+    if start { // border is endTime of past interval
+      guard let endTime = pastInterval.endTime else { return standartRange }
+      
+      isEqual = Calendar.current.isDate(currentInterval.startTime, equalTo: endTime, toGranularity: .minute)
+      limit = Calendar.current.component(.second, from: endTime) + Int(intervalOffset)
+      
+    } else { // border is startTime of current interval
+      guard let endTime = currentInterval.endTime else { return standartRange }
+      
+      isEqual = Calendar.current.isDate(endTime, equalTo: currentInterval.startTime, toGranularity: .minute)
+      limit = Calendar.current.component(.second, from: currentInterval.startTime) + Int(intervalOffset)
+    }
+    
+    if limit >= 60 { return standartRange }
+    return isEqual ? limit..<60 : standartRange
+  }
+  
   private func validateIntervalChain() {
-    let offset: TimeInterval = 60
     
     for i in 0..<draftSession.intervals.count {
       if let currentEnd = draftSession.intervals[i].endTime {
-        if currentEnd < draftSession.intervals[i].startTime + offset {
-          draftSession.intervals[i].endTime = draftSession.intervals[i].startTime + offset
+        if currentEnd < draftSession.intervals[i].startTime + intervalOffset {
+          draftSession.intervals[i].endTime = draftSession.intervals[i].startTime + intervalOffset
         }
       }
       

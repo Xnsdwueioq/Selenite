@@ -19,34 +19,36 @@ struct SessionIntervalsView: View {
       ForEach(viewModel.draftIntervals.indices, id: \.self) { index in
         Section {
           VStack(alignment: .leading) {
-            Text("Начало интервала")
-              .foregroundStyle(.secondary)
-              .font(.footnote)
-            DatePicker(
-              selection: $viewModel.draftIntervals[index].startTime,
-              in: viewModel.getDatePickerRange(index: index, start: true),
-              displayedComponents: [.date, .hourAndMinute]
-            ) { EmptyView() }
+            HStack(spacing: 4) {
+              DatePicker(
+                selection: $viewModel.draftIntervals[index].startTime,
+                in: viewModel.getDatePickerRange(index: index, start: true),
+                displayedComponents: [.date, .hourAndMinute]
+              ) { EmptyView() }
+              SecondsPickerView(date: $viewModel.draftIntervals[index].startTime)
+            }
           }
           
           VStack(alignment: .leading) {
-            Text("Конец интервала")
-              .foregroundStyle(.secondary)
-              .font(.footnote)
             if let _ = viewModel.draftIntervals[index].endTime {
-              DatePicker(
-                selection: Binding(
-                  get: { viewModel.draftIntervals[index].endTime ?? Date() },
-                  set: { viewModel.draftIntervals[index].endTime = $0 }
-                ),
-                in: viewModel.getDatePickerRange(index: index, start: false),
-                displayedComponents: [.date, .hourAndMinute]
-              ) { EmptyView() }
+              let endTimeBinding = Binding(
+                get: { viewModel.draftIntervals[index].endTime ?? Date() },
+                set: { viewModel.draftIntervals[index].endTime = $0 }
+              )
+              HStack(spacing: 4) {
+                DatePicker(
+                  selection: endTimeBinding,
+                  in: viewModel.getDatePickerRange(index: index, start: false),
+                  displayedComponents: [.date, .hourAndMinute]
+                ) { EmptyView() }
+                SecondsPickerView(date: endTimeBinding)
+              }
             } else {
                Text(notEndedTime)
              }
           }
         }
+        .listRowSeparator(.hidden)
       }
       .onAppear {
         viewModel.printDraftIntervals()
