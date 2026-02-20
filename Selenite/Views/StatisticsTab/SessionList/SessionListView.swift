@@ -13,7 +13,7 @@ struct SessionListView: View {
   @State private var viewModel: SessionListViewModel?
   
   var body: some View {
-    if (viewModel?.groupedSessions .isEmpty ?? true) {
+    if (viewModel?.groupedSessions.isEmpty ?? true) {
       ContentUnavailableView("Нет записанных сессий", systemImage: "tray.fill", description: Text("Чтобы начать свою первую сессию запустите таймер"))
     }
     List {
