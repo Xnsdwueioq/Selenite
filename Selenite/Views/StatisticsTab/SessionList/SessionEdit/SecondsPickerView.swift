@@ -34,7 +34,7 @@ struct SecondsPickerView: View {
                   Calendar.current.component(.second, from: date)
                 },
                 set: { newValue in
-                  date = Calendar.current.date(bySetting: .second, value: newValue, of: date) ?? date
+                  date = date.setSeconds(seconds: newValue)
                 }
                )
         ) {

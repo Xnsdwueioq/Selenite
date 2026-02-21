@@ -158,16 +158,16 @@ final class SessionEditViewModel {
 
     let standartRange = 0..<60
     let currentInterval = draftIntervals[index]
-    let pastInterval = draftIntervals[index - 1]
 
     var isEqual: Bool
     var limit: Int
     
     if start { // border is endTime of past interval
+      let pastInterval = draftIntervals[index - 1]
       guard let endTime = pastInterval.endTime else { return standartRange }
       
       isEqual = Calendar.current.isDate(currentInterval.startTime, equalTo: endTime, toGranularity: .minute)
-      limit = Calendar.current.component(.second, from: endTime) + Int(intervalOffset)
+      limit = Calendar.current.component(.second, from: endTime)
       
     } else { // border is startTime of current interval
       guard let endTime = currentInterval.endTime else { return standartRange }

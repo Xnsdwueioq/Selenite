@@ -25,7 +25,7 @@ struct SessionIntervalsView: View {
                 in: viewModel.getDatePickerRange(index: index, start: true),
                 displayedComponents: [.date, .hourAndMinute]
               ) { EmptyView() }
-              SecondsPickerView(date: $viewModel.draftIntervals[index].startTime)
+              SecondsPickerView(date: $viewModel.draftIntervals[index].startTime, secondsRange: viewModel.getSecondsPickerRange(index: index, start: true))
             }
           }
           
@@ -41,7 +41,7 @@ struct SessionIntervalsView: View {
                   in: viewModel.getDatePickerRange(index: index, start: false),
                   displayedComponents: [.date, .hourAndMinute]
                 ) { EmptyView() }
-                SecondsPickerView(date: endTimeBinding)
+                SecondsPickerView(date: endTimeBinding, secondsRange: viewModel.getSecondsPickerRange(index: index, start: false))
               }
             } else {
                Text(notEndedTime)
