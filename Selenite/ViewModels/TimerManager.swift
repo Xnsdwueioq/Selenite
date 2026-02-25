@@ -96,7 +96,22 @@ final class TimerManager {
   }
   
   func endPeriod() {
+    deleteShortIntervals()
     activePeriod = nil
+  }
+  
+  func deleteShortIntervals() {
+    guard let activePeriod else { return }
+    printData(with: "===INTERVALS <1'' WILL DELETED===")
+
+    let toDelete = activePeriod.intervals.filter { $0.duration < 1 }
+    
+    toDelete.forEach { modelContext?.delete($0) }
+    
+    activePeriod.intervals.removeAll { $0.duration < 1 }
+    
+    // DEBUG
+    printData(with: "===INTERVALS <1'' HAVE DELETED===")
   }
   
   // MARK: - Breaks Logic
@@ -238,13 +253,20 @@ final class TimerManager {
       switch periodState {
       case .idle: break
       default:
-        stopPulse()
-        endPeriod()
+        if let period = activePeriod {
+          stopPulse()
+          if !period.isIntervalClosed {
+            closeCurrentInterval()
+            period.fragmentedType = period.calculateFragmentedType
+          }
+          endPeriod()
+        }
       }
       resetBreaksCount()
       resetSessionNumber()
       periodType = .session
       currentSessionIndicator = .notStart
+      periodState = .idle
     }
   }
   
@@ -376,7 +398,6 @@ final class TimerManager {
   
   // MARK: Play/Pause Button
   func playButtonAction() {
-    printData(with: "old data---")
     switch periodState {
     case .idle:
       startTimer()
@@ -385,7 +406,6 @@ final class TimerManager {
     case .paused:
       resumeTimer()
     }
-    printData(with: "---new data")
   }
   
   func playButtonSystemImage() -> String {
@@ -405,11 +425,7 @@ final class TimerManager {
   }
   
   func nextButtonAction() {
-    // DEBUG
-    printData(with: "---before skip")
     skipTime()
-    printData(with: "after skip---")
-    
   }
   
   // MARK: Reset Button
@@ -433,6 +449,9 @@ final class TimerManager {
   // MARK: - Debug Module
   func printData(with message: String) {
     print(message)
+    for periodInterval in activePeriod?.intervals ?? [] {
+      print(periodInterval.startTime, periodInterval.endTime)
+    }
     print("curr session: \(currentSessionNumber)")
     print("curr session indicator: \(currentSessionIndicator)")
     print("breakCount: \(breaksCount)")
