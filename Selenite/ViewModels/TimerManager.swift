@@ -110,6 +110,11 @@ final class TimerManager {
     
     activePeriod.intervals.removeAll { $0.duration < 1 }
     
+    if activePeriod.intervals.isEmpty {
+      modelContext?.delete(activePeriod)
+      self.activePeriod = nil
+    }
+    
     // DEBUG
     printData(with: "===INTERVALS <1'' HAVE DELETED===")
   }

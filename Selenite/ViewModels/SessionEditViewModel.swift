@@ -16,7 +16,7 @@ struct PeriodIntervalDraft: Identifiable {
   var endTime: Date?
   
   var duration: TimeInterval {
-    startTime.distance(to: endTime ?? Date())
+    startTime.distance(to: endTime ?? Date()).rounded()
   }
   
   init(from model: PeriodInterval) {
@@ -33,9 +33,12 @@ private struct PeriodDraft {
   var intervals: [PeriodIntervalDraft]
   
   var periodDuration: TimeInterval {
-    intervals.reduce(into: 0) { total, interval in
+    let duration = intervals.reduce(into: 0) { total, interval in
       total += interval.duration
+      print(interval.duration)
     }
+    
+    return duration.rounded(.toNearestOrEven)
   }
   
   var calculateFragmentedType: FragmentedType {
@@ -213,7 +216,7 @@ private extension PeriodDraft {
   var formattedDuration: String {
     let duration = Duration.seconds(periodDuration)
     return duration.formatted(
-      .units(allowed: [.hours, .minutes], width: .abbreviated)
+      .units(allowed: [.hours, .minutes, .seconds], width: .abbreviated)
     )
   }
 }
