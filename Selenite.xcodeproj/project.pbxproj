@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B70314132F77CD4300B1BC72 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B70314122F77CD4300B1BC72 /* LICENSE.txt */; };
 		B715CCF52F2A5D1D00D8EF4D /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B715CCF42F2A5D1D00D8EF4D /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B70314122F77CD4300B1BC72 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		B715CCE12F2A5C2D00D8EF4D /* Selenite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Selenite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B715CCF42F2A5D1D00D8EF4D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		B7D2DD772F48C0030081AD05 /* Test_space.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Test_space.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -51,6 +53,7 @@
 		B715CCD82F2A5C2D00D8EF4D = {
 			isa = PBXGroup;
 			children = (
+				B70314122F77CD4300B1BC72 /* LICENSE.txt */,
 				B7D2DD772F48C0030081AD05 /* Test_space.playground */,
 				B715CCF42F2A5D1D00D8EF4D /* .gitignore */,
 				B715CCE32F2A5C2D00D8EF4D /* Selenite */,
@@ -130,6 +133,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B70314132F77CD4300B1BC72 /* LICENSE.txt in Resources */,
 				B715CCF52F2A5D1D00D8EF4D /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
