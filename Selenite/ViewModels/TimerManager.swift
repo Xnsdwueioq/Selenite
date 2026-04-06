@@ -96,7 +96,9 @@ final class TimerManager {
   }
   
   func endPeriod() {
-    deleteShortIntervals()
+    if periodType == .session {
+      deleteShortIntervals()
+    }
     activePeriod = nil
   }
   
@@ -111,6 +113,7 @@ final class TimerManager {
     activePeriod.intervals.removeAll { $0.duration < 1 }
     
     if activePeriod.intervals.isEmpty {
+      printData(with: "===Current Period has not intervals with duration >1''. Period will be deleted===")
       modelContext?.delete(activePeriod)
       self.activePeriod = nil
     }
