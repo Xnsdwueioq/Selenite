@@ -13,9 +13,45 @@ import UIKit
 final class SettingsManager {
   static let shared = SettingsManager()
   
+  private let local = UserDefaults.standard
+  
   private let store = NSUbiquitousKeyValueStore.default
   private var saveTask: Task<Void, Never>?
   private var isUpdatingFromCloud = false
+  
+  // MARK: - Init
+  
+  private init() {
+    // Settings initializing from UserDefaults
+    self._synchronizeCalendar = local.bool(forKey: SettingKey.synchronizeCalendar.rawValue)
+    self._selectedCalendar = {
+      guard let data = local.data(forKey: SettingKey.selectedCalendar.rawValue) else {
+        print("No data found in UserDefaults for 'selected_calendar' key")
+        return nil
+      }
+      let decoder = JSONDecoder()
+      do {
+        return try decoder.decode(CalendarItem.self, from: data)
+      } catch {
+        print("Decoding error: \(error.localizedDescription)")
+        return nil
+      }
+    }()
+    
+    // Первоначальная загрузка данных из KVS
+    loadFromCloud()
+    
+    // DEBUG
+    NSLog("~\(UIDevice.current.name) init -> loadFromCloud")
+    
+    // Наблюдатель за изменениями KVS
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(cloudDataChanged),
+      name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+      object: store
+    )
+  }
   
   // MARK: - Properties
   
@@ -51,18 +87,32 @@ final class SettingsManager {
     didSet { scheduleCloudSync() }
   }
   
-  // MARK: - Init
+  // EventKit settings
+  var synchronizeCalendar: Bool {
+    didSet {
+      local.set(synchronizeCalendar, forKey: SettingKey.synchronizeCalendar.rawValue)
+    }
+  }
   
-  private init() {
-    loadFromCloud()
-    // DEBUG
-    NSLog("~\(UIDevice.current.name) init -> loadFromCloud")
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(cloudDataChanged),
-      name: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
-      object: store
-    )
+  var selectedCalendar: CalendarItem? {
+    didSet {
+      print("[AppSettings][selectedCalendar] didSet was called \(Date())")
+      guard oldValue != selectedCalendar else {
+        print("[AppSettings][selectedCalendar] selected calendar has not changed. Exiting didSet closure")
+        return
+      }
+      let encoder = JSONEncoder()
+      if let data = try? encoder.encode(selectedCalendar) {
+        local.set(data, forKey: SettingKey.selectedCalendar.rawValue)
+      } else {
+        local.removeObject(forKey: SettingKey.selectedCalendar.rawValue)
+      }
+    }
+  }
+  
+  enum SettingKey: String {
+    case synchronizeCalendar = "synchronize_calendar"
+    case selectedCalendar = "selected_calendar"
   }
   
   // MARK: - Duration Validation

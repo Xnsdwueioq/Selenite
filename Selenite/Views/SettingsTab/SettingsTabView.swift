@@ -15,6 +15,14 @@ struct SettingsTabView: View {
   @State private var viewModel: SettingsViewModel?
   @State private var activeAlert: ActiveAlert?
   
+  @State private var eventKitManager: EventKitManager
+  @State private var calendarService: CalendarService
+  
+  init(manager: EventKitManager = EventKitManager.shared) {
+    self.eventKitManager = manager
+    self._calendarService = State(initialValue: CalendarService(eventStore: manager.eventStore))
+  }
+  
   private var sessionCountWithLimits: Binding<Double> {
     Binding(
       get: { appSettings.sessionCount },
@@ -63,6 +71,11 @@ struct SettingsTabView: View {
             ToggleParameterView(parameterName: "Автоматический старт перерыва", value: $appSettings.breakAutostart)
           }
         }
+        
+        Section("Apple Calendar") {
+          CalendarSyncContainer(calendarService: calendarService)
+        }
+        
         Button(
           "Очистить историю сессий",
           role: .destructive,

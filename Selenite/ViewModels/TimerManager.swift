@@ -98,6 +98,9 @@ final class TimerManager {
   func endPeriod() {
     if periodType == .session {
       deleteShortIntervals()
+      if let activePeriod {
+        // TODO: Save to Apple Calendar
+      }
     }
     activePeriod = nil
   }
@@ -458,7 +461,7 @@ final class TimerManager {
   func printData(with message: String) {
     print(message)
     for periodInterval in activePeriod?.intervals ?? [] {
-      print(periodInterval.startTime, periodInterval.endTime)
+      print(periodInterval.startTime, periodInterval.endTime ?? "None")
     }
     print("curr session: \(currentSessionNumber)")
     print("curr session indicator: \(currentSessionIndicator)")
