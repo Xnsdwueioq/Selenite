@@ -15,7 +15,7 @@
 		B70314122F77CD4300B1BC72 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		B715CCE12F2A5C2D00D8EF4D /* Selenite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Selenite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B715CCF42F2A5D1D00D8EF4D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		B7D2DD772F48C0030081AD05 /* Test_space.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Test_space.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		B717456C2F8FC42200A53100 /* Selenite Draft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Selenite Draft.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -37,10 +37,22 @@
 			path = Selenite;
 			sourceTree = "<group>";
 		};
+		B717456D2F8FC42200A53100 /* Selenite Draft */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Selenite Draft";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		B715CCDE2F2A5C2D00D8EF4D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B71745692F8FC42200A53100 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -54,9 +66,9 @@
 			isa = PBXGroup;
 			children = (
 				B70314122F77CD4300B1BC72 /* LICENSE.txt */,
-				B7D2DD772F48C0030081AD05 /* Test_space.playground */,
 				B715CCF42F2A5D1D00D8EF4D /* .gitignore */,
 				B715CCE32F2A5C2D00D8EF4D /* Selenite */,
+				B717456D2F8FC42200A53100 /* Selenite Draft */,
 				B715CCE22F2A5C2D00D8EF4D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,6 +77,7 @@
 			isa = PBXGroup;
 			children = (
 				B715CCE12F2A5C2D00D8EF4D /* Selenite.app */,
+				B717456C2F8FC42200A53100 /* Selenite Draft.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -94,6 +107,28 @@
 			productReference = B715CCE12F2A5C2D00D8EF4D /* Selenite.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B717456B2F8FC42200A53100 /* Selenite Draft */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B71745742F8FC42400A53100 /* Build configuration list for PBXNativeTarget "Selenite Draft" */;
+			buildPhases = (
+				B71745682F8FC42200A53100 /* Sources */,
+				B71745692F8FC42200A53100 /* Frameworks */,
+				B717456A2F8FC42200A53100 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B717456D2F8FC42200A53100 /* Selenite Draft */,
+			);
+			name = "Selenite Draft";
+			packageProductDependencies = (
+			);
+			productName = "Selenite Draft";
+			productReference = B717456C2F8FC42200A53100 /* Selenite Draft.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -101,11 +136,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2620;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					B715CCE02F2A5C2D00D8EF4D = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					B717456B2F8FC42200A53100 = {
+						CreatedOnToolsVersion = 26.4;
 					};
 				};
 			};
@@ -124,6 +162,7 @@
 			projectRoot = "";
 			targets = (
 				B715CCE02F2A5C2D00D8EF4D /* Selenite */,
+				B717456B2F8FC42200A53100 /* Selenite Draft */,
 			);
 		};
 /* End PBXProject section */
@@ -138,10 +177,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B717456A2F8FC42200A53100 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B715CCDD2F2A5C2D00D8EF4D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B71745682F8FC42200A53100 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -373,6 +426,73 @@
 			};
 			name = Release;
 		};
+		B71745752F8FC42400A53100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sye7qjm3ac.Selenite-Draft";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B71745762F8FC42400A53100 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sye7qjm3ac.Selenite-Draft";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -390,6 +510,15 @@
 			buildConfigurations = (
 				B715CCF02F2A5C2F00D8EF4D /* Debug */,
 				B715CCF12F2A5C2F00D8EF4D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B71745742F8FC42400A53100 /* Build configuration list for PBXNativeTarget "Selenite Draft" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B71745752F8FC42400A53100 /* Debug */,
+				B71745762F8FC42400A53100 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

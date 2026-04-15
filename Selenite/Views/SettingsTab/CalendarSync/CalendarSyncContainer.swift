@@ -38,25 +38,31 @@ struct CalendarSyncContainer: View {
             .presentationDetents([.medium, .large])
           }
       }
-      .alert("Нет доступа к календарю",
-             isPresented: $viewModel.isAlertPresent,
-             actions: {
-        Button("Перейти в настройки", role: .confirm) {
-          Task {
-            await viewModel.openSettings()
+      .alert(viewModel.alertType?.title ?? "Ошибка",
+             isPresented: Binding(get: { viewModel.alertType != nil }, set: { newValue in if !newValue { viewModel.alertType = nil } }),
+             presenting: viewModel.alertType,
+             actions: { alertType in
+        switch alertType {
+        case .notAuthorized:
+          Button("Перейти в настройки", role: .confirm) {
+            Task {
+              await viewModel.openSettings()
+            }
           }
+          Button("Ок", role: .close) { }
+        case .nilCalendar:
+          Button("Выбрать календарь", role: .cancel) { viewModel.openCalendarSelectionSheet() }
+          Button("Выключить синхронизацию", role: .destructive) { viewModel.isSynchronizeOn = false }
         }
-        Button("Ок", role: .close) { }
       },
-             message: { Text("Перейдите в настройки и разрешите полный доступ") }
-      )
-      .alert("Календарь не выбран",
-             isPresented: $viewModel.isCalendarNilPresent,
-             actions: {
-        Button("Выбрать календарь", role: .cancel) { viewModel.openCalendarSelectionSheet() }
-        Button("Выключить синхронизацию", role: .destructive) { viewModel.isSynchronizeOn = false }
-      },
-             message: { Text("Выберите новый календарь для возможности синхронизации с Apple Calendar") }
+             message: { alertType in
+        switch alertType {
+        case .notAuthorized:
+          Text("Перейдите в настройки и разрешите полный доступ")
+        case .nilCalendar:
+          Text("Выберите новый календарь для возможности синхронизации с Apple Calendar")
+        }
+      }
       )
   }
 }

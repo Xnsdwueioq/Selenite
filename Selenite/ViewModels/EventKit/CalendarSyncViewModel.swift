@@ -44,21 +44,34 @@ final class CalendarSyncViewModel {
     print("[SettingsTabViewModel][checkAuthorizationStatus] was called")
     if isSynchronizeOn && !hasFullAccess {
       isSynchronizeOn = false
-      isAlertPresent = true
+      alertType = .notAuthorized
     }
   }
   
   func processNilCalendar() {
     if isSynchronizeOn && hasFullAccess && settingsManager.selectedCalendar == nil {
-      isCalendarNilPresent = true
+      alertType = .nilCalendar
     }
   }
   
   // MARK: - Additional Screens Logic
   
-  var isAlertPresent = false
+  var alertType: AlertType?
   
-  var isCalendarNilPresent = false
+  enum AlertType {
+    case notAuthorized
+    case nilCalendar
+    
+    var title: String {
+      switch self {
+      case .notAuthorized:
+        return "Нет доступа к календарю"
+      case .nilCalendar:
+        return "Календарь не выбран"
+      }
+    }
+  }
+  
   
   var isCalendarSelected = false
   
@@ -75,17 +88,15 @@ final class CalendarSyncViewModel {
   var isCalendarCreated = false
   
   func onDismissCalendarCreated() {
-    isCalendarSelected = true
   }
   
   func openCalendarCreationSheet() {
-    isCalendarSelected = false
     isCalendarCreated = true
   }
   
   private func presentAlert(with status: Bool = false) {
     if !status {
-      isAlertPresent = true
+      alertType = .notAuthorized
     }
   }
   
