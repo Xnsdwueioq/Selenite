@@ -43,6 +43,11 @@ final class Period {
   @Relationship(deleteRule: .cascade)
   var intervals: [PeriodInterval]
   
+  /// Returns the sorted intervals array
+  var sortedIntervals: [PeriodInterval] {
+    intervals.sorted(by: { $0.startTime < $1.startTime })
+  }
+  
   /// Returns total duration of period
   var periodDuration: TimeInterval {
     intervals.reduce(into: 0) { total, interval in
@@ -53,7 +58,8 @@ final class Period {
   /// Returns duration of interruptions
   var interruptionsDuration: TimeInterval {
     guard intervals.count >= 2 else { return 0 }
-    let sortedIntervals = intervals.sorted(by: { $0.startTime < $1.startTime })
+    
+    let sortedIntervals = sortedIntervals
     
     var total: TimeInterval = 0
     for i in 0..<(sortedIntervals.count - 1) {
@@ -72,7 +78,8 @@ final class Period {
   
   /// Returns the status of the period last interval's completion. Returns `True` if period hasn't intervals
   var isLastIntervalClosed: Bool {
-    intervals.last?.isClosed ?? true
+    let sortedIntervals = sortedIntervals
+    return sortedIntervals.last?.isClosed ?? true
   }
   
   init(
