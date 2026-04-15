@@ -16,11 +16,12 @@ struct SettingsTabView: View {
   @State private var activeAlert: ActiveAlert?
   
   @State private var eventKitManager: EventKitManager
-  @State private var calendarService: CalendarService
+  @State private var calendarSyncViewModel: CalendarSyncViewModel
   
   init(manager: EventKitManager = EventKitManager.shared) {
     self.eventKitManager = manager
-    self._calendarService = State(initialValue: CalendarService(eventStore: manager.eventStore))
+    let calendarService = CalendarService(eventStore: manager.eventStore)
+    self._calendarSyncViewModel = State(initialValue: CalendarSyncViewModel(calendarService: calendarService))
   }
   
   private var sessionCountWithLimits: Binding<Double> {
@@ -73,7 +74,7 @@ struct SettingsTabView: View {
         }
         
         Section("Apple Calendar") {
-          CalendarSyncContainer(calendarService: calendarService)
+          CalendarSyncContainer(viewModel: calendarSyncViewModel)
         }
         
         Button(
@@ -85,6 +86,7 @@ struct SettingsTabView: View {
         )
       }
       .animation(.snappy, value: appSettings.areBreaksDisabled)
+      .animation(.snappy, value: calendarSyncViewModel.isSynchronizeOn)
       .navigationTitle("Настройки")
       .alert(
         activeAlert?.alertTitle ?? "",

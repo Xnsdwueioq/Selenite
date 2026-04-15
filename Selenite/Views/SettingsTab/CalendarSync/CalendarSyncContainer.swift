@@ -9,20 +9,34 @@ import SwiftUI
 import EventKit
 
 struct CalendarSyncContainer: View {
-  @State private var viewModel: CalendarSyncViewModel
-  
-  init(
-    calendarService: CalendarService
-  ) {
-    self._viewModel = State(initialValue: CalendarSyncViewModel(
-      calendarService: calendarService
-    ))
-  }
+  @Bindable var viewModel: CalendarSyncViewModel
   
   var body: some View {
     CalendarSyncView(viewModel: viewModel)
       .onAppear {
         viewModel.checkAuthorisationStatus()
+      }
+      .animation(.snappy, value: viewModel.isSynchronizeOn)
+      .sheet(
+        isPresented: $viewModel.isCalendarSelected,
+        onDismiss: viewModel.onDismissCalendarSelected
+      ) {
+        CalendarsSheetView(viewModel: viewModel)
+          .presentationDragIndicator(.visible)
+          .presentationDetents([.medium, .large])
+          .sheet(
+            isPresented: $viewModel.isCalendarCreated,
+            onDismiss: viewModel.onDismissCalendarCreated
+          ) {
+            CalendarCreationSheetView(
+              newCalendarTitle: $viewModel.newCalendarTitle,
+              newCalendarColor: $viewModel.newCalendarColor,
+              creationCalendarAction: viewModel.creationCalendarAction,
+              isNewCalendarTitleValidate: viewModel.isNewCalendarTitleValidate
+            )
+            .presentationDragIndicator(.visible)
+            .presentationDetents([.medium, .large])
+          }
       }
       .alert("Нет доступа к календарю",
              isPresented: $viewModel.isAlertPresent,
