@@ -16,7 +16,8 @@ final class AppSettings {
     self.settingsManager = settingsManager
   }
   
-  // MARK: - Computed Properties
+  // MARK: - KVS Settings
+  
   var sessionTitle: String {
     get { settingsManager.sessionTitle }
     set { settingsManager.sessionTitle = newValue }
@@ -55,5 +56,17 @@ final class AppSettings {
   var breakAutostart: Bool {
     get { settingsManager.breakAutostart }
     set { settingsManager.breakAutostart = newValue }
+  }
+  
+  // MARK: - Local Settings
+  
+  var synchronizeCalendar: Bool {
+    get { settingsManager.synchronizeCalendar }
+    set { settingsManager.synchronizeCalendar = newValue }
+  }
+  
+  var selectedCalendar: CalendarItem? {
+    get { settingsManager.selectedCalendar }
+    set { settingsManager.selectedCalendar = newValue }
   }
 }

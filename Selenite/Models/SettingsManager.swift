@@ -53,7 +53,7 @@ final class SettingsManager {
     )
   }
   
-  // MARK: - Properties
+  // MARK: - KVS Settings
   
   var sessionTitle: String = "Selenite" {
     didSet { scheduleCloudSync() }
@@ -86,6 +86,8 @@ final class SettingsManager {
   var breakAutostart: Bool = false {
     didSet { scheduleCloudSync() }
   }
+  
+  // MARK: - Local Settings
   
   // EventKit settings
   var synchronizeCalendar: Bool {

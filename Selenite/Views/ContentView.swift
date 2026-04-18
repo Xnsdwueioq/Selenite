@@ -8,57 +8,53 @@
 import SwiftUI
 import SwiftData
 
-
-enum AppTab: Identifiable {
-  case statistics
-  case timer
-  case settings
-  
-  var id: Self { return self }
-  
-  var systemImage: String {
-    switch self {
-    case .statistics: return "chart.bar.xaxis"
-    case .timer: return "play"
-    case .settings: return "gear"
-    }
-  }
-}
-
 struct ContentView: View {
   @Environment(\.modelContext) private var modelContext
   @State private var timerManager = TimerManager(settingsManager: .shared)
   @State private var appSettings = AppSettings(settingsManager: .shared)
-  @State private var selectedTab = AppTab.timer
+  @State private var appCoordinator = AppCoordinator()
   
   var body: some View {
-    TabView(selection: $selectedTab) {
-      // MARK: Statistic Tab
-      Tab(value: AppTab.statistics, content: {
-        StatisticsTabView()
-      }, label: {
-        Image(systemName: AppTab.statistics.systemImage)
-      })
-      
-      // MARK: Timer Tab
-      Tab(value: AppTab.timer, content: {
-        TimerTabView()
-      }, label: {
-        Image(systemName: AppTab.timer.systemImage)
-      })
-      
-      // MARK: Settings Tab
-      Tab(value: AppTab.settings, content: {
-        SettingsTabView()
-      }, label: {
-        Image(systemName: AppTab.settings.systemImage)
-      })
-    }
-    .environment(timerManager)
-    .environment(appSettings)
-    .onAppear {
-      timerManager.modelContext = modelContext
-    }
+    let selectedAlert = appCoordinator.selectedAlert
+    
+    TabsView()
+      .environment(appSettings)
+      .environment(appCoordinator)
+      .environment(timerManager)
+      .onAppear {
+        timerManager.modelContext = modelContext
+      }
+      .alert(
+        selectedAlert?.title ?? "Ошибка",
+        isPresented: Binding(
+          get: { selectedAlert != nil },
+          set: { newValue in
+            if !newValue { appCoordinator.selectedAlert = nil }
+          }
+        ),
+        presenting: selectedAlert,
+        actions: { alertType in
+          switch alertType {
+          case .noAccessToCalendar:
+            Button("Перейти в настройки", role: .confirm) {
+              Task {
+                await appCoordinator.openSystemSettings()
+              }
+            }
+            Button("Ок", role: .close) { }
+          case .nilCalendarSelected:
+            Button("Выбрать календарь", role: .cancel) {
+              // TODO: Открыть выбор календарей
+            }
+            Button("Выключить синхронизацию", role: .destructive) {
+              appSettings.synchronizeCalendar = false
+            }
+          }
+        },
+        message: { alertType in
+          Text(alertType.message)
+        }
+      )
   }
 }
 

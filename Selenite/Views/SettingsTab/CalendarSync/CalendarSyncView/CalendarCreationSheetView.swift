@@ -26,12 +26,12 @@ struct CalendarCreationSheetView: View {
         ColorPicker("Цвет", selection: $newCalendarColor, supportsOpacity: false)
       }
       .toolbar {
-        // CREATE button
+        // MARK: Create button
         ToolbarItem(placement: .bottomBar) {
           Button("Create", systemImage: "plus", role: .confirm) {
             creationCalendarAction()
           }
-          .tint(.accentColor) // TODO: CHANGE ACCENT COLOR TO BREND COLOR
+          .tint(.purpleBrand)
           .controlSize(.extraLarge)
           .disabled(!isNewCalendarTitleValidate)
         }

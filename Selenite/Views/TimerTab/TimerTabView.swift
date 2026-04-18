@@ -18,7 +18,7 @@ struct TimerTabView: View {
     let _ = timerManager.pulse
     NavigationStack {
       VStack(spacing: 5) {
-        // TEXTFIELD
+        // MARK: - Textfield
         TextField(
           "Название",
           text: Binding(
@@ -38,19 +38,19 @@ struct TimerTabView: View {
         .multilineTextAlignment(.center)
         .disabled(timerManager.getDisableCondition())
         
-        // TIMER
+        // MARK: - Timer
         Text(timerManager.remainingTime())
           .font(.system(size: 82))
           .fontWeight(.medium)
         
         VStack(spacing: 20) {
-          // INDICATORS
+          // MARK: Indicators
           SessionProgressView(total: timerManager.getSessionsTotalNumber(), current: timerManager.getCurrentSessionNumber(), sessionIndicator: timerManager.getCurrentSessionIndicator())
             .animation(.easeInOut(duration: 0.2), value: timerManager.currentSessionIndicator)
           
-          // PLAY CONTROLS
+          // MARK: Play Controls
           HStack(spacing: 20) {
-            // PREV BUTTON
+            // Prev Button
             Button(action: {
               timerManager.previousButtonAction()
             }) {
@@ -58,7 +58,7 @@ struct TimerTabView: View {
                 .foregroundStyle(.black)
             }
             
-            // PLAY/PAUSE BUTTON
+            // Play/Button
             Button(action: {
               timerManager.playButtonAction()
             }) {
@@ -69,7 +69,7 @@ struct TimerTabView: View {
             .buttonBorderShape(.circle)
             .controlSize(.extraLarge)
             
-            // NEXT BUTTON
+            // Next Button
             Button(action: {
               timerManager.nextButtonAction()
             }) {
@@ -80,6 +80,7 @@ struct TimerTabView: View {
         }
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
+      // MARK: - Gestures
       .contentShape(Rectangle())
       .gesture (
         DragGesture()
@@ -92,6 +93,7 @@ struct TimerTabView: View {
             viewModel.endDragGesture()
           }
       )
+      // MARK: - Toolbar
       .toolbar {
         ToolbarItem(placement: .topBarTrailing, content: {
           // RESTART BUTTON

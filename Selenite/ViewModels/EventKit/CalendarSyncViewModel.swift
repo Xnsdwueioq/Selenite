@@ -13,6 +13,7 @@ import SwiftUI
 @Observable
 final class CalendarSyncViewModel {
   private let settingsManager: SettingsManager
+  private let appCoordinator: AppCoordinator
   
   private let eventKitManager: EventKitManager
   private let calendarService: CalendarService
@@ -28,9 +29,11 @@ final class CalendarSyncViewModel {
   init(
     settingsManager: SettingsManager = SettingsManager.shared,
     eventKitManager: EventKitManager = EventKitManager.shared,
+    appCoordinator: AppCoordinator,
     calendarService: CalendarService
   ) {
     self.settingsManager = settingsManager
+    self.appCoordinator = appCoordinator
     self.eventKitManager = eventKitManager
     self.calendarService = calendarService
     
@@ -44,34 +47,17 @@ final class CalendarSyncViewModel {
     print("[SettingsTabViewModel][checkAuthorizationStatus] was called")
     if isSynchronizeOn && !hasFullAccess {
       isSynchronizeOn = false
-      alertType = .notAuthorized
+      appCoordinator.selectedAlert = .noAccessToCalendar
     }
   }
   
   func processNilCalendar() {
     if isSynchronizeOn && hasFullAccess && settingsManager.selectedCalendar == nil {
-      alertType = .nilCalendar
+      appCoordinator.selectedAlert = .nilCalendarSelected
     }
   }
   
   // MARK: - Additional Screens Logic
-  
-  var alertType: AlertType?
-  
-  enum AlertType {
-    case notAuthorized
-    case nilCalendar
-    
-    var title: String {
-      switch self {
-      case .notAuthorized:
-        return "Нет доступа к календарю"
-      case .nilCalendar:
-        return "Календарь не выбран"
-      }
-    }
-  }
-  
   
   var isCalendarSelected = false
   
@@ -92,18 +78,6 @@ final class CalendarSyncViewModel {
   
   func openCalendarCreationSheet() {
     isCalendarCreated = true
-  }
-  
-  private func presentAlert(with status: Bool = false) {
-    if !status {
-      alertType = .notAuthorized
-    }
-  }
-  
-  func openSettings() async {
-    if let url = URL(string: UIApplication.openSettingsURLString) {
-      await UIApplication.shared.open(url)
-    }
   }
   
   // MARK: - Calendar Creation
@@ -128,17 +102,6 @@ final class CalendarSyncViewModel {
     
     if let createdCalendarId {
       pickCalendar(with: createdCalendarId)
-    }
-  }
-  
-  var isSynchronizeOn: Bool = false {
-    didSet {
-      if isSynchronizeOn == oldValue { return }
-      if !isSynchronizeOn {
-        settingsManager.synchronizeCalendar = false
-      } else {
-        handleSyncTurnedOn()
-      }
     }
   }
   
@@ -209,6 +172,17 @@ final class CalendarSyncViewModel {
   
   // MARK: - Sync Toggle Logic
   
+  var isSynchronizeOn: Bool = false {
+    didSet {
+      if isSynchronizeOn == oldValue { return }
+      if !isSynchronizeOn {
+        settingsManager.synchronizeCalendar = false
+      } else {
+        handleSyncTurnedOn()
+      }
+    }
+  }
+  
   @MainActor
   private func handleSyncTurnedOn() {
     let status = eventKitManager.authrorizationStatus
@@ -229,7 +203,7 @@ final class CalendarSyncViewModel {
             self.isSynchronizeOn = true
           } else {
             self.isSynchronizeOn = false
-            presentAlert()
+              appCoordinator.selectedAlert = .noAccessToCalendar
           }
         } catch {
           self.isSynchronizeOn = false
@@ -239,7 +213,7 @@ final class CalendarSyncViewModel {
       
     case .denied, .restricted, .writeOnly:
       self.isSynchronizeOn = false
-      presentAlert()
+      appCoordinator.selectedAlert = .noAccessToCalendar
       
     @unknown default:
       self.isSynchronizeOn = false

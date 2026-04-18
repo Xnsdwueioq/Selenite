@@ -11,7 +11,7 @@ struct ListRowView: View {
   let session: Period
   
   var body: some View {
-    NavigationLink(value: AppRoute.sessionEdit(session: session)) {
+    NavigationLink(value: StatisticsScreen.sessionEdit(session: session)) {
       HStack {
         Text(session.title)
         Spacer()

@@ -12,123 +12,90 @@ struct SettingsTabView: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(TimerManager.self) private var timerManager
   @Environment(AppSettings.self) private var appSettings
+  @Environment(AppCoordinator.self) private var appCoordinator
+  
   @State private var viewModel: SettingsViewModel?
-  @State private var activeAlert: ActiveAlert?
   
   @State private var eventKitManager: EventKitManager
   @State private var calendarSyncViewModel: CalendarSyncViewModel
   
-  init(manager: EventKitManager = EventKitManager.shared) {
+  init(
+    manager: EventKitManager = EventKitManager.shared,
+    appCoordinator: AppCoordinator
+  ) {
     self.eventKitManager = manager
     let calendarService = CalendarService(eventStore: manager.eventStore)
-    self._calendarSyncViewModel = State(initialValue: CalendarSyncViewModel(calendarService: calendarService))
+    self._calendarSyncViewModel = State(initialValue:CalendarSyncViewModel(appCoordinator: appCoordinator, calendarService: calendarService))
   }
-  
-  private var sessionCountWithLimits: Binding<Double> {
-    Binding(
-      get: { appSettings.sessionCount },
-      set: { newValue in
-        let minAllowed = Double(timerManager.getCurrentSessionNumber())
-        appSettings.sessionCount = max(newValue, minAllowed)
-      }
-    )
-  }
-  
+
   var body: some View {
     @Bindable var appSettings = appSettings
+    let selectedAlert = appCoordinator.settingsCoordindator.selectedAlert
     
     NavigationStack {
       List {
-        Section("Сессия") {
-          SliderParameterView(parameterName: "Продолжительность сессии", value: $appSettings.sessionDuration)
-          VStack {
-            HStack {
-              Text("Количество сессий")
-              Spacer()
-              Text(String(Int(appSettings.sessionCount)))
-                .foregroundStyle(.secondary)
-            }
-            
-            Slider(
-              value: sessionCountWithLimits,
-              in: 1...10,
-              step: 1,
-              label: {
-                Text("Количество сесий")
-              },
-              currentValueLabel: {
-                Text(String(appSettings.sessionCount))
-              }
-            )
-          }
-          ToggleParameterView(parameterName: "Автоматический старт сессии", value: $appSettings.sessionAutostart)
-        }
-        
-        Section("Перерывы") {
-          ToggleParameterView(parameterName: "Отключить перерывы", value: $appSettings.areBreaksDisabled)
-          if !appSettings.areBreaksDisabled {
-            SliderParameterView(parameterName: "Короткий перерыв", value: $appSettings.shortBreakDuration)
-            SliderParameterView(parameterName: "Длинный перерыв", value: $appSettings.longBreakDuration)
-            ToggleParameterView(parameterName: "Автоматический старт перерыва", value: $appSettings.breakAutostart)
-          }
-        }
-        
-        Section("Apple Calendar") {
-          CalendarSyncContainer(viewModel: calendarSyncViewModel)
-        }
-        
+        SessionDurationSettingsView()
+        BreakDurationSettingsView()
+        CalendarSyncView(viewModel: calendarSyncViewModel)
+
         Button(
           "Очистить историю сессий",
           role: .destructive,
           action: {
-            activeAlert = .deleteAll
+            appCoordinator.settingsCoordindator.selectedAlert = .deleteAll
           }
         )
       }
-      .animation(.snappy, value: appSettings.areBreaksDisabled)
-      .animation(.snappy, value: calendarSyncViewModel.isSynchronizeOn)
       .navigationTitle("Настройки")
+      .animation(.snappy, value: appSettings.areBreaksDisabled)
+      .animation(.snappy, value: appSettings.synchronizeCalendar)
       .alert(
-        activeAlert?.alertTitle ?? "",
+        selectedAlert?.title ?? "Ошибка",
         isPresented: Binding(
-          get: { activeAlert != nil },
-          set: { if !$0 { activeAlert = nil } }
-        ),
-        presenting: activeAlert
-      ) { alert in
-        switch alert {
-        case .deleteAll:
-          Button("Подтвердить", role: .destructive) {
-              viewModel?.deleteSessionsHistory()
+          get: { selectedAlert != nil },
+          set: { newValue in
+            if !newValue { appCoordinator.settingsCoordindator.selectedAlert = nil }
           }
-          Button("Отмена", role: .cancel) { }
+        ),
+        presenting: selectedAlert,
+        actions: { alertType in
+          switch alertType {
+          case .deleteAll:
+            Button("Подтвердить", role: .destructive) {
+              viewModel?.deleteSessionsHistory()
+            }
+            Button("Отмена", role: .cancel) { }
+          }
+        },
+        message: { alertType in
+          Text(alertType.message)
         }
-      } message: { alert in
-        if let message = alert.alertMessage {
-          Text(message)
-        }
+      )
+      .sheet(
+        isPresented: $calendarSyncViewModel.isCalendarSelected,
+        onDismiss: calendarSyncViewModel.onDismissCalendarSelected
+      ) {
+        CalendarsSheetView(viewModel: calendarSyncViewModel)
+          .presentationDragIndicator(.visible)
+          .presentationDetents([.medium, .large])
+          .sheet(
+            isPresented: $calendarSyncViewModel.isCalendarCreated,
+            onDismiss: calendarSyncViewModel.onDismissCalendarCreated
+          ) {
+            CalendarCreationSheetView(
+              newCalendarTitle: $calendarSyncViewModel.newCalendarTitle,
+              newCalendarColor: $calendarSyncViewModel.newCalendarColor,
+              creationCalendarAction: calendarSyncViewModel.creationCalendarAction,
+              isNewCalendarTitleValidate: calendarSyncViewModel.isNewCalendarTitleValidate
+            )
+            .presentationDragIndicator(.visible)
+            .presentationDetents([.medium, .large])
+          }
       }
     }
     .onAppear {
       viewModel = SettingsViewModel(modelContext: modelContext)
-    }
-  }
-  
-  private enum ActiveAlert {
-    case deleteAll
-    
-    var alertTitle: String {
-      switch self {
-      case .deleteAll:
-        return "Очистить историю сессий?"
-      }
-    }
-    
-    var alertMessage: String? {
-      switch self {
-      case .deleteAll:
-        return "Все записанные сессии будут удалены безвозвратно."
-      }
+      calendarSyncViewModel.checkAuthorisationStatus()
     }
   }
 }
@@ -168,7 +135,7 @@ struct ToggleParameterView: View {
 }
 
 #Preview {
-  SettingsTabView()
+  SettingsTabView(appCoordinator: AppCoordinator())
     .modelContainer(for: [Period.self, PeriodInterval.self])
     .environment(TimerManager(settingsManager: SettingsManager.shared))
     .environment(AppSettings(settingsManager: .shared))
