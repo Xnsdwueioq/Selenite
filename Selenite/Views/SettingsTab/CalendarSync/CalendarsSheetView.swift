@@ -13,7 +13,7 @@ struct CalendarsSheetView: View {
     
   var body: some View {
     List {
-      // Кнопка добавления календаря
+      // MARK: - Calendar Creation Button
       Button(action: {
         viewModel.openCalendarCreationSheet()
       }, label: {
@@ -27,7 +27,7 @@ struct CalendarsSheetView: View {
       })
       .disabled(!viewModel.hasFullAccess)
       
-      // Список календарей
+      // MARK: - Calendar Picker
       Picker(selection: $viewModel.pickedCalendarID, content: {
         ForEach(viewModel.calendarsToDisplay) { calendar in
           HStack(spacing: 10) {

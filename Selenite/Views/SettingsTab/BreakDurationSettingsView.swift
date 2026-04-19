@@ -14,7 +14,7 @@ struct BreakDurationSettingsView: View {
     @Bindable var appSettings = appSettings
     
     Section("Перерывы") {
-      ToggleParameterView(parameterName: "Отключить перерывы", value: $appSettings.areBreaksDisabled)
+      ToggleParameterView(parameterName: "Отключить перерывы", value: $appSettings.areBreaksDisabled.animation(.snappy))
       if !appSettings.areBreaksDisabled {
         SliderParameterView(parameterName: "Короткий перерыв", value: $appSettings.shortBreakDuration)
         SliderParameterView(parameterName: "Длинный перерыв", value: $appSettings.longBreakDuration)

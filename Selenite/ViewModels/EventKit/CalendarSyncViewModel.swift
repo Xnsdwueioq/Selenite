@@ -12,7 +12,7 @@ import SwiftUI
 
 @Observable
 final class CalendarSyncViewModel {
-  private let settingsManager: SettingsManager
+  private let appSettings: AppSettings
   private let appCoordinator: AppCoordinator
   
   private let eventKitManager: EventKitManager
@@ -27,43 +27,38 @@ final class CalendarSyncViewModel {
   }
   
   init(
-    settingsManager: SettingsManager = SettingsManager.shared,
     eventKitManager: EventKitManager = EventKitManager.shared,
+    appSettings: AppSettings,
     appCoordinator: AppCoordinator,
     calendarService: CalendarService
   ) {
-    self.settingsManager = settingsManager
-    self.appCoordinator = appCoordinator
     self.eventKitManager = eventKitManager
+    self.appSettings = appSettings
+    self.appCoordinator = appCoordinator
     self.calendarService = calendarService
     
-    self._isSynchronizeOn = settingsManager.synchronizeCalendar
+    self._isSynchronizeOn = appSettings.synchronizeCalendar
     
     repickCalendar()
-    processNilCalendar()
-  }
-  
-  func checkAuthorisationStatus() {
-    print("[SettingsTabViewModel][checkAuthorizationStatus] was called")
-    if isSynchronizeOn && !hasFullAccess {
-      isSynchronizeOn = false
-      appCoordinator.selectedAlert = .noAccessToCalendar
-    }
-  }
-  
-  func processNilCalendar() {
-    if isSynchronizeOn && hasFullAccess && settingsManager.selectedCalendar == nil {
-      appCoordinator.selectedAlert = .nilCalendarSelected
-    }
   }
   
   // MARK: - Additional Screens Logic
+    
+  var isCalendarSelected: Bool {
+    get {
+      appCoordinator.settingsCoordindator.isCalendarSelected
+    }
+    set {
+      appCoordinator.settingsCoordindator.isCalendarSelected = newValue
+    }
+  }
   
-  var isCalendarSelected = false
-  
-  func onDismissCalendarSelected() {
-    if !isCalendarCreated && settingsManager.selectedCalendar == nil {
-      isSynchronizeOn = false
+  var isCalendarCreated: Bool {
+    get {
+      appCoordinator.settingsCoordindator.isCalendarCreated
+    }
+    set {
+      appCoordinator.settingsCoordindator.isCalendarCreated = newValue
     }
   }
   
@@ -71,14 +66,10 @@ final class CalendarSyncViewModel {
     isCalendarSelected = true
   }
   
-  var isCalendarCreated = false
-  
-  func onDismissCalendarCreated() {
-  }
-  
   func openCalendarCreationSheet() {
     isCalendarCreated = true
   }
+  
   
   // MARK: - Calendar Creation
   
@@ -109,11 +100,11 @@ final class CalendarSyncViewModel {
   
   var pickedCalendarID: String? {
     get {
-      settingsManager.selectedCalendar?.id
+      appSettings.selectedCalendar?.id
     }
     set {
       guard let newId = newValue,
-            newId != settingsManager.selectedCalendar?.id else {
+            newId != appSettings.selectedCalendar?.id else {
         return
       }
       pickCalendar(with: newId)
@@ -121,14 +112,14 @@ final class CalendarSyncViewModel {
   }
   
   var selectedCalendarColorView: Color {
-    guard let selectedCalendar = settingsManager.selectedCalendar else {
+    guard let selectedCalendar = appSettings.selectedCalendar else {
       return Color.white.opacity(0)
     }
     return Color(cgColor: selectedCalendar.color)
   }
   
   var selectedCalendarTitleView: String {
-    guard let selectedCalendar = settingsManager.selectedCalendar else {
+    guard let selectedCalendar = appSettings.selectedCalendar else {
       return "Не выбран"
     }
     return selectedCalendar.title
@@ -138,7 +129,7 @@ final class CalendarSyncViewModel {
     print("[SettingsTabViewModel][onCalendarsChangedAction] was called")
     guard let pickedCalendarID,
           let selectedEKCalendarActual = calendarService.findCalendar(with: pickedCalendarID),
-          let selectedCalendar = settingsManager.selectedCalendar else {
+          let selectedCalendar = appSettings.selectedCalendar else {
       return
     }
     
@@ -160,13 +151,11 @@ final class CalendarSyncViewModel {
     print("[SettingsTabViewModel][pickCalendar] was called")
     guard let selectedCalendar = calendarService.findCalendar(with: id) else {
       print("Can't select a calendar because it can't be found by calendarIdentifier via the CalendarService. AppSettings.selectedCalendar became equal to nil.")
-      settingsManager.selectedCalendar = nil
-      
-      processNilCalendar()
-
+      appSettings.selectedCalendar = nil
+    
       return
     }
-    settingsManager.selectedCalendar = CalendarItem(from: selectedCalendar)
+    appSettings.selectedCalendar = CalendarItem(from: selectedCalendar)
   }
   
   
@@ -174,9 +163,9 @@ final class CalendarSyncViewModel {
   
   var isSynchronizeOn: Bool = false {
     didSet {
-      if isSynchronizeOn == oldValue { return }
+      guard isSynchronizeOn != oldValue else { return }
       if !isSynchronizeOn {
-        settingsManager.synchronizeCalendar = false
+        appSettings.synchronizeCalendar = false
       } else {
         handleSyncTurnedOn()
       }
@@ -189,8 +178,8 @@ final class CalendarSyncViewModel {
     
     switch status {
     case .fullAccess:
-      settingsManager.synchronizeCalendar = true
-      if settingsManager.selectedCalendar == nil {
+      appSettings.synchronizeCalendar = true
+      if appSettings.selectedCalendar == nil {
         isCalendarSelected = true
       }
       
@@ -199,7 +188,7 @@ final class CalendarSyncViewModel {
         do {
           let granted = try await eventKitManager.requestAccess()
           if granted {
-            self.settingsManager.synchronizeCalendar = true
+            self.appSettings.synchronizeCalendar = true
             self.isSynchronizeOn = true
           } else {
             self.isSynchronizeOn = false

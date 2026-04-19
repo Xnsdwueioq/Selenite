@@ -20,16 +20,19 @@ struct SettingsTabView: View {
   @State private var calendarSyncViewModel: CalendarSyncViewModel
   
   init(
+    appSettings: AppSettings,
     manager: EventKitManager = EventKitManager.shared,
     appCoordinator: AppCoordinator
   ) {
     self.eventKitManager = manager
     let calendarService = CalendarService(eventStore: manager.eventStore)
-    self._calendarSyncViewModel = State(initialValue:CalendarSyncViewModel(appCoordinator: appCoordinator, calendarService: calendarService))
+    self._calendarSyncViewModel = State(initialValue:CalendarSyncViewModel(appSettings: appSettings, appCoordinator: appCoordinator, calendarService: calendarService))
   }
 
   var body: some View {
     @Bindable var appSettings = appSettings
+    @Bindable var settingsCoordinator = appCoordinator.settingsCoordindator
+    
     let selectedAlert = appCoordinator.settingsCoordindator.selectedAlert
     
     NavigationStack {
@@ -47,8 +50,6 @@ struct SettingsTabView: View {
         )
       }
       .navigationTitle("Настройки")
-      .animation(.snappy, value: appSettings.areBreaksDisabled)
-      .animation(.snappy, value: appSettings.synchronizeCalendar)
       .alert(
         selectedAlert?.title ?? "Ошибка",
         isPresented: Binding(
@@ -72,15 +73,14 @@ struct SettingsTabView: View {
         }
       )
       .sheet(
-        isPresented: $calendarSyncViewModel.isCalendarSelected,
-        onDismiss: calendarSyncViewModel.onDismissCalendarSelected
+        isPresented: $settingsCoordinator.isCalendarSelected,
+        onDismiss: { settingsCoordinator.onDismissCalendarSelectedSheet(appSettings: appSettings) }
       ) {
         CalendarsSheetView(viewModel: calendarSyncViewModel)
           .presentationDragIndicator(.visible)
           .presentationDetents([.medium, .large])
           .sheet(
-            isPresented: $calendarSyncViewModel.isCalendarCreated,
-            onDismiss: calendarSyncViewModel.onDismissCalendarCreated
+            isPresented: $settingsCoordinator.isCalendarCreated
           ) {
             CalendarCreationSheetView(
               newCalendarTitle: $calendarSyncViewModel.newCalendarTitle,
@@ -95,7 +95,7 @@ struct SettingsTabView: View {
     }
     .onAppear {
       viewModel = SettingsViewModel(modelContext: modelContext)
-      calendarSyncViewModel.checkAuthorisationStatus()
+      appSettings.checkAuthStatus(appCoordinator: appCoordinator)
     }
   }
 }
@@ -135,7 +135,7 @@ struct ToggleParameterView: View {
 }
 
 #Preview {
-  SettingsTabView(appCoordinator: AppCoordinator())
+  SettingsTabView(appSettings: AppSettings(), appCoordinator: AppCoordinator())
     .modelContainer(for: [Period.self, PeriodInterval.self])
     .environment(TimerManager(settingsManager: SettingsManager.shared))
     .environment(AppSettings(settingsManager: .shared))

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TabsView: View {
+  @Environment(AppSettings.self) private var appSettings
   @Environment(AppCoordinator.self) private var appCoordinator
   
   var body: some View {
@@ -30,7 +31,7 @@ struct TabsView: View {
       
       // MARK: Settings Tab
       Tab(value: AppTab.settings, content: {
-        SettingsTabView(appCoordinator: appCoordinator)
+        SettingsTabView(appSettings: appSettings, appCoordinator: appCoordinator)
       }, label: {
         Image(systemName: AppTab.settings.systemImage)
       })

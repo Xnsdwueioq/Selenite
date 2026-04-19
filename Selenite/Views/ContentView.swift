@@ -14,6 +14,8 @@ struct ContentView: View {
   @State private var appSettings = AppSettings(settingsManager: .shared)
   @State private var appCoordinator = AppCoordinator()
   
+  @State private var eventKitManager = EventKitManager.shared
+  
   var body: some View {
     let selectedAlert = appCoordinator.selectedAlert
     
@@ -23,6 +25,8 @@ struct ContentView: View {
       .environment(timerManager)
       .onAppear {
         timerManager.modelContext = modelContext
+        appSettings.checkAuthStatus(appCoordinator: appCoordinator)
+        appSettings.checkNilCalendar(appCoordinator: appCoordinator)
       }
       .alert(
         selectedAlert?.title ?? "Ошибка",
@@ -44,7 +48,7 @@ struct ContentView: View {
             Button("Ок", role: .close) { }
           case .nilCalendarSelected:
             Button("Выбрать календарь", role: .cancel) {
-              // TODO: Открыть выбор календарей
+              
             }
             Button("Выключить синхронизацию", role: .destructive) {
               appSettings.synchronizeCalendar = false

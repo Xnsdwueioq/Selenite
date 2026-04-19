@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import EventKit
 
 @Observable
 final class AppSettings {
@@ -68,5 +69,22 @@ final class AppSettings {
   var selectedCalendar: CalendarItem? {
     get { settingsManager.selectedCalendar }
     set { settingsManager.selectedCalendar = newValue }
+  }
+  
+  // MARK: - Drive
+  
+  func checkAuthStatus(eventKitManager: EventKitManager = .shared, appCoordinator: AppCoordinator) {
+    print("[AppSettings][checkAuthStatus] was called")
+    if synchronizeCalendar && eventKitManager.authrorizationStatus != .fullAccess {
+      synchronizeCalendar = false
+      appCoordinator.selectedAlert = .noAccessToCalendar
+    }
+  }
+  
+  func checkNilCalendar(eventKitManager: EventKitManager = .shared, appCoordinator: AppCoordinator) {
+    print("[AppSettings][checkNilCalendar] was called")
+    if synchronizeCalendar && eventKitManager.authrorizationStatus == .fullAccess && selectedCalendar == nil {
+      appCoordinator.selectedAlert = .nilCalendarSelected
+    }
   }
 }

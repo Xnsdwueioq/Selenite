@@ -26,4 +26,13 @@ enum SettingsAlertType {
 @Observable
 final class SettingsCoordinator {
   var selectedAlert: SettingsAlertType?
+  
+  var isCalendarSelected: Bool = false
+  var isCalendarCreated: Bool = false
+  
+  func onDismissCalendarSelectedSheet(appSettings: AppSettings) {
+    if appSettings.synchronizeCalendar && appSettings.selectedCalendar == nil {
+      appSettings.synchronizeCalendar = false
+    }
+  }
 }
