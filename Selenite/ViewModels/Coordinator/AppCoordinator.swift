@@ -56,6 +56,11 @@ final class AppCoordinator {
       await UIApplication.shared.open(url)
     }
   }
+  
+  func openCalendarSelectionSheet() {
+    selectedTab = .settings
+    settingsCoordindator.isCalendarSelected = true
+  }
 }
 
 

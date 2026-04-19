@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-
+import EventKit
 
 @Observable
 final class SettingsManager {

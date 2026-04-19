@@ -76,7 +76,6 @@ final class AppSettings {
   func checkAuthStatus(eventKitManager: EventKitManager = .shared, appCoordinator: AppCoordinator) {
     print("[AppSettings][checkAuthStatus] was called")
     if synchronizeCalendar && eventKitManager.authrorizationStatus != .fullAccess {
-      synchronizeCalendar = false
       appCoordinator.selectedAlert = .noAccessToCalendar
     }
   }

@@ -48,7 +48,7 @@ struct ContentView: View {
             Button("Ок", role: .close) { }
           case .nilCalendarSelected:
             Button("Выбрать календарь", role: .cancel) {
-              
+              appCoordinator.openCalendarSelectionSheet()
             }
             Button("Выключить синхронизацию", role: .destructive) {
               appSettings.synchronizeCalendar = false

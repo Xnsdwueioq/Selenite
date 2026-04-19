@@ -95,7 +95,6 @@ struct SettingsTabView: View {
     }
     .onAppear {
       viewModel = SettingsViewModel(modelContext: modelContext)
-      appSettings.checkAuthStatus(appCoordinator: appCoordinator)
     }
   }
 }
