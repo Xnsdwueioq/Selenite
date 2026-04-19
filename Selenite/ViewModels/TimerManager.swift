@@ -34,14 +34,19 @@ enum ReturnType {
 
 @Observable
 final class TimerManager {
-  private let settingsManager: SettingsManager
   var modelContext: ModelContext?
+  
+  var eventsService: EventsService?
+  private let settingsManager: SettingsManager
   
   private var activePeriod: Period?
   var periodState: PeriodState = .idle
   var periodType: PeriodType = .session
   
-  init(settingsManager: SettingsManager = .shared, modelContext: ModelContext? = nil) {
+  init(
+    settingsManager: SettingsManager = .shared,
+    modelContext: ModelContext? = nil
+  ) {
     self.settingsManager = settingsManager
     self.modelContext = modelContext
   }
@@ -99,7 +104,11 @@ final class TimerManager {
     if periodType == .session {
       deleteShortIntervals()
       if let activePeriod {
-        // TODO: Save to Apple Calendar
+        guard let selectedCalendar = settingsManager.selectedCalendar else {
+          print("**ERROR**[TimerManager][endPeriod] event was not added to calendar")
+          return
+        }
+        eventsService?.addPeriod(calendar: selectedCalendar, title: settingsManager.sessionTitle, period: activePeriod)
       }
     }
     activePeriod = nil

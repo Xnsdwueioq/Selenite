@@ -62,6 +62,7 @@ final class ContentViewModel {
   private func checkAuthStatus() {
     print("[AppSettings][checkAuthStatus] was called")
     if appSettings.synchronizeCalendar && eventKitManager.authrorizationStatus != .fullAccess {
+      appSettings.synchronizeCalendar = false
       appCoordinator.selectedAlert = .noAccessToCalendar
       print("[AppSettings][checkAuthStatus] was completed successful")
     }

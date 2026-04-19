@@ -125,16 +125,7 @@ final class CalendarService {
   }
   
   func onCalendarsChangedAction() {
-    print("[SettingsTabViewModel][onCalendarsChangedAction] was called")
-    guard let pickedCalendarID,
-          let selectedEKCalendarActual = findCalendar(with: pickedCalendarID),
-          let selectedCalendar = appSettings?.selectedCalendar else {
-      return
-    }
-    
-    let selectedCalendarActual = CalendarItem(from: selectedEKCalendarActual)
-    if selectedCalendarActual.hashValue != selectedCalendar.hashValue {
-      repickCalendar()
-    }
+    print("[CalendarService][onCalendarsChangedAction] was called")
+    repickCalendar()
   }
 }

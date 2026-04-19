@@ -17,6 +17,7 @@ struct ContentView: View {
   @State private var viewModel: ContentViewModel?
   
   @State private var calendarService = CalendarService(eventStore: EventKitManager.shared.eventStore)
+  @State private var eventsService = EventsService(eventStore: EventKitManager.shared.eventStore)
   
   var body: some View {
     let selectedAlert = appCoordinator.selectedAlert
@@ -24,6 +25,7 @@ struct ContentView: View {
     TabsView()
       .onAppear {
         timerManager.modelContext = modelContext
+        timerManager.eventsService = eventsService
         calendarService.appSettings = appSettings
         viewModel = ContentViewModel(appCoordinator: appCoordinator, appSettings: appSettings, calendarService: calendarService)
       }
@@ -63,22 +65,4 @@ struct ContentView: View {
         }
       )
   }
-}
-
-#Preview {
-  let container: ModelContainer = {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    return try! ModelContainer(for: Period.self, PeriodInterval.self, configurations: config)
-  }()
-  
-  let previewManager = TimerManager(
-    settingsManager: .shared,
-    modelContext: container.mainContext
-  )
-  
-  ContentView()
-    .modelContainer(container)
-    .environment(previewManager)
-    .environment(AppSettings(settingsManager: .shared))
-    .tint(.purpleBrand)
 }

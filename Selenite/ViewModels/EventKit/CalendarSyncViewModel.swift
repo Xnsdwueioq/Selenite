@@ -96,6 +96,20 @@ final class CalendarSyncViewModel {
   
   // MARK: - Calendar Selection
   
+  var selectedCalendarColorView: Color {
+    guard let selectedCalendar = appSettings.selectedCalendar else {
+      return Color.white.opacity(0)
+    }
+    return Color(cgColor: selectedCalendar.color)
+  }
+  
+  var selectedCalendarTitleView: String {
+    guard let selectedCalendar = appSettings.selectedCalendar else {
+      return "Не выбран"
+    }
+    return selectedCalendar.title
+  }
+  
   var pickedCalendarID: String? {
     get {
       appSettings.selectedCalendar?.id
