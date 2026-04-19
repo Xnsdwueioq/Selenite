@@ -1,29 +1,19 @@
 //
-//  StatisticsTabView.swift
+//  ChartsView.swift
 //  Selenite
 //
-//  Created by Eyhciurmrn Zmpodackrl on 29.01.2026.
+//  Created by Eyhciurmrn Zmpodackrl on 20.04.2026.
 //
 
 import SwiftUI
 import SwiftData
+import Charts
 
-struct StatisticsTabView: View {
+struct ChartsView: View {
+  @Bindable var viewModel: StatisticsViewModel
+  
   var body: some View {
-    NavigationStack {
-      Form {
-        NavigationLink("История сессий", value: StatisticsScreen.sessionList)
-        
-      }
-      .navigationDestination(for: StatisticsScreen.self) { screen in
-        switch screen {
-        case .sessionList:
-          SessionListView()
-        case .sessionEdit(let session):
-          SessionEditView(session: session)
-        }
-      }
-    }
+    
   }
 }
 
@@ -82,7 +72,7 @@ struct StatisticsTabView: View {
     return container
   }()
   
-  StatisticsTabView()
+  StatisticsView()
     .modelContainer(container)
     .tint(.purpleBrand)
 }

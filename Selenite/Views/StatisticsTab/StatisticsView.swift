@@ -1,28 +1,31 @@
 //
-//  StatisticsTabView.swift
+//  StatisticsView.swift
 //  Selenite
 //
-//  Created by Eyhciurmrn Zmpodackrl on 29.01.2026.
+//  Created by Eyhciurmrn Zmpodackrl on 20.04.2026.
 //
 
 import SwiftUI
 import SwiftData
 
-struct StatisticsTabView: View {
+struct StatisticsView: View {
+  @Environment(\.modelContext) private var modelContext
+  @State private var viewModel: StatisticsViewModel?
+  
   var body: some View {
-    NavigationStack {
-      Form {
-        NavigationLink("История сессий", value: StatisticsScreen.sessionList)
-        
-      }
-      .navigationDestination(for: StatisticsScreen.self) { screen in
-        switch screen {
-        case .sessionList:
-          SessionListView()
-        case .sessionEdit(let session):
-          SessionEditView(session: session)
+    Group {
+      if let viewModel {
+        if !viewModel.sessions.isEmpty {
+          ChartsView(viewModel: viewModel)
+        } else {
+          ContentUnavailableView("Список записей пуст", systemImage: "info.circle.text.page.fill", description: Text("Выполните свою первую сессию чтобы увидеть статистику"))
         }
+      } else {
+        ContentUnavailableView("Не удалось загрузить данные", systemImage: "exclamationmark.triangle.text.page.fill")
       }
+    }
+    .onAppear {
+      viewModel = StatisticsViewModel(modelContext: modelContext)
     }
   }
 }
@@ -82,7 +85,7 @@ struct StatisticsTabView: View {
     return container
   }()
   
-  StatisticsTabView()
+  StatisticsView()
     .modelContainer(container)
     .tint(.purpleBrand)
 }
