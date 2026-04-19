@@ -17,6 +17,8 @@ final class CalendarService {
   private(set) var availableCalendars: [CalendarItem] = []
   private var calendarChangeObserver: Any?
   
+  var appSettings: AppSettings?
+  
   init(eventStore: EKEventStore) {
     self.eventStore = eventStore
     
@@ -91,10 +93,48 @@ final class CalendarService {
   
   // MARK: - Calendar Selecting
   
+  var pickedCalendarID: String? {
+    get {
+      appSettings?.selectedCalendar?.id
+    }
+  }
+  
   func findCalendar(with id: String) -> EKCalendar? {
     let selectedCalendar = eventStore.calendar(withIdentifier: id)
     
     return selectedCalendar
   }
   
+  func pickCalendar(with id: String) {
+    print("[CalendarService][pickCalendar] was called")
+    guard let selectedCalendar = findCalendar(with: id) else {
+      print("Can't select a calendar because it can't be found by calendarIdentifier via the CalendarService. AppSettings.selectedCalendar became equal to nil.")
+      appSettings?.selectedCalendar = nil
+      
+      return
+    }
+    appSettings?.selectedCalendar = CalendarItem(from: selectedCalendar)
+  }
+  
+  func repickCalendar() {
+    print("[CalendarService][repickCalendar] was called")
+    guard let currentId = pickedCalendarID else {
+      return
+    }
+    pickCalendar(with: currentId)
+  }
+  
+  func onCalendarsChangedAction() {
+    print("[SettingsTabViewModel][onCalendarsChangedAction] was called")
+    guard let pickedCalendarID,
+          let selectedEKCalendarActual = findCalendar(with: pickedCalendarID),
+          let selectedCalendar = appSettings?.selectedCalendar else {
+      return
+    }
+    
+    let selectedCalendarActual = CalendarItem(from: selectedEKCalendarActual)
+    if selectedCalendarActual.hashValue != selectedCalendar.hashValue {
+      repickCalendar()
+    }
+  }
 }

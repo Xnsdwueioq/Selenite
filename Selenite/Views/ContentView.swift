@@ -13,21 +13,24 @@ struct ContentView: View {
   @State private var timerManager = TimerManager(settingsManager: .shared)
   @State private var appSettings = AppSettings(settingsManager: .shared)
   @State private var appCoordinator = AppCoordinator()
-  
   @State private var eventKitManager = EventKitManager.shared
+  @State private var viewModel: ContentViewModel?
+  
+  @State private var calendarService = CalendarService(eventStore: EventKitManager.shared.eventStore)
   
   var body: some View {
     let selectedAlert = appCoordinator.selectedAlert
     
     TabsView()
+      .onAppear {
+        timerManager.modelContext = modelContext
+        calendarService.appSettings = appSettings
+        viewModel = ContentViewModel(appCoordinator: appCoordinator, appSettings: appSettings, calendarService: calendarService)
+      }
       .environment(appSettings)
       .environment(appCoordinator)
       .environment(timerManager)
-      .onAppear {
-        timerManager.modelContext = modelContext
-        appSettings.checkAuthStatus(appCoordinator: appCoordinator)
-        appSettings.checkNilCalendar(appCoordinator: appCoordinator)
-      }
+      .environment(calendarService)
       .alert(
         selectedAlert?.title ?? "Ошибка",
         isPresented: Binding(

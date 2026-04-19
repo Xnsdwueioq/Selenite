@@ -10,6 +10,7 @@ import SwiftUI
 struct TabsView: View {
   @Environment(AppSettings.self) private var appSettings
   @Environment(AppCoordinator.self) private var appCoordinator
+  @Environment(CalendarService.self) private var calendarService
   
   var body: some View {
     @Bindable var appCoordinator = appCoordinator
@@ -31,7 +32,7 @@ struct TabsView: View {
       
       // MARK: Settings Tab
       Tab(value: AppTab.settings, content: {
-        SettingsTabView(appSettings: appSettings, appCoordinator: appCoordinator)
+        SettingsTabView(appSettings: appSettings, appCoordinator: appCoordinator, calendarService: calendarService)
       }, label: {
         Image(systemName: AppTab.settings.systemImage)
       })

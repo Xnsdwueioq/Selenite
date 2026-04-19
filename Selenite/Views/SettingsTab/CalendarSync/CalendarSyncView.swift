@@ -34,7 +34,7 @@ struct CalendarSyncView: View {
         })
         .tint(.primary)
         .onChange(of: viewModel.calendarsToDisplay) {
-          viewModel.onCalendarsChangedAction()
+//          viewModel.calendarService.onCalendarsChangedAction()
         }
       }
     }

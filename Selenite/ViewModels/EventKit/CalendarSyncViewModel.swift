@@ -36,10 +36,8 @@ final class CalendarSyncViewModel {
     self.appSettings = appSettings
     self.appCoordinator = appCoordinator
     self.calendarService = calendarService
-    
-    self._isSynchronizeOn = appSettings.synchronizeCalendar
-    
-    repickCalendar()
+        
+    calendarService.repickCalendar()
   }
   
   // MARK: - Additional Screens Logic
@@ -92,7 +90,7 @@ final class CalendarSyncViewModel {
     resetNewCalendarData()
     
     if let createdCalendarId {
-      pickCalendar(with: createdCalendarId)
+      calendarService.pickCalendar(with: createdCalendarId)
     }
   }
   
@@ -107,105 +105,64 @@ final class CalendarSyncViewModel {
             newId != appSettings.selectedCalendar?.id else {
         return
       }
-      pickCalendar(with: newId)
+      calendarService.pickCalendar(with: newId)
     }
   }
-  
-  var selectedCalendarColorView: Color {
-    guard let selectedCalendar = appSettings.selectedCalendar else {
-      return Color.white.opacity(0)
-    }
-    return Color(cgColor: selectedCalendar.color)
-  }
-  
-  var selectedCalendarTitleView: String {
-    guard let selectedCalendar = appSettings.selectedCalendar else {
-      return "Не выбран"
-    }
-    return selectedCalendar.title
-  }
-  
-  func onCalendarsChangedAction() {
-    print("[SettingsTabViewModel][onCalendarsChangedAction] was called")
-    guard let pickedCalendarID,
-          let selectedEKCalendarActual = calendarService.findCalendar(with: pickedCalendarID),
-          let selectedCalendar = appSettings.selectedCalendar else {
-      return
-    }
-    
-    let selectedCalendarActual = CalendarItem(from: selectedEKCalendarActual)
-    if selectedCalendarActual.hashValue != selectedCalendar.hashValue {
-      repickCalendar()
-    }
-  }
-  
-  func repickCalendar() {
-    print("[SettingsTabViewModel][repickCalendar] was called")
-    guard let currentId = pickedCalendarID else {
-      return
-    }
-    pickCalendar(with: currentId)
-  }
-  
-  private func pickCalendar(with id: String) {
-    print("[SettingsTabViewModel][pickCalendar] was called")
-    guard let selectedCalendar = calendarService.findCalendar(with: id) else {
-      print("Can't select a calendar because it can't be found by calendarIdentifier via the CalendarService. AppSettings.selectedCalendar became equal to nil.")
-      appSettings.selectedCalendar = nil
-    
-      return
-    }
-    appSettings.selectedCalendar = CalendarItem(from: selectedCalendar)
-  }
-  
   
   // MARK: - Sync Toggle Logic
   
-  var isSynchronizeOn: Bool = false {
-    didSet {
-      guard isSynchronizeOn != oldValue else { return }
-      if !isSynchronizeOn {
+  var isSynchronizeOn: Bool {
+    get {
+      appSettings.synchronizeCalendar
+    }
+    set {
+      guard isSynchronizeOn != newValue else { return }
+      if !newValue {
         appSettings.synchronizeCalendar = false
       } else {
-        handleSyncTurnedOn()
+        appSettings.synchronizeCalendar = handleSyncTurnedOn()
       }
     }
   }
   
   @MainActor
-  private func handleSyncTurnedOn() {
+  private func handleSyncTurnedOn() -> Bool {
     let status = eventKitManager.authrorizationStatus
     
     switch status {
     case .fullAccess:
-      appSettings.synchronizeCalendar = true
       if appSettings.selectedCalendar == nil {
         isCalendarSelected = true
       }
+      return true
       
     case .notDetermined:
       Task {
         do {
           let granted = try await eventKitManager.requestAccess()
           if granted {
-            self.appSettings.synchronizeCalendar = true
-            self.isSynchronizeOn = true
+            if appSettings.selectedCalendar == nil {
+              isCalendarSelected = true
+            }
+            return true
           } else {
-            self.isSynchronizeOn = false
-              appCoordinator.selectedAlert = .noAccessToCalendar
+            appCoordinator.selectedAlert = .noAccessToCalendar
+            return false
           }
         } catch {
-          self.isSynchronizeOn = false
           print("Ошибка доступа: \(error.localizedDescription)")
+          return false
         }
       }
       
     case .denied, .restricted, .writeOnly:
-      self.isSynchronizeOn = false
       appCoordinator.selectedAlert = .noAccessToCalendar
+      return false
       
     @unknown default:
-      self.isSynchronizeOn = false
+      return false
     }
+    
+    return false
   }
 }

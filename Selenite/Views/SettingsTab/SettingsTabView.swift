@@ -15,18 +15,15 @@ struct SettingsTabView: View {
   @Environment(AppCoordinator.self) private var appCoordinator
   
   @State private var viewModel: SettingsViewModel?
-  
-  @State private var eventKitManager: EventKitManager
   @State private var calendarSyncViewModel: CalendarSyncViewModel
   
   init(
     appSettings: AppSettings,
     manager: EventKitManager = EventKitManager.shared,
-    appCoordinator: AppCoordinator
+    appCoordinator: AppCoordinator,
+    calendarService: CalendarService
   ) {
-    self.eventKitManager = manager
-    let calendarService = CalendarService(eventStore: manager.eventStore)
-    self._calendarSyncViewModel = State(initialValue:CalendarSyncViewModel(appSettings: appSettings, appCoordinator: appCoordinator, calendarService: calendarService))
+    self._calendarSyncViewModel = State(initialValue: CalendarSyncViewModel(appSettings: appSettings, appCoordinator: appCoordinator, calendarService: calendarService))
   }
 
   var body: some View {
@@ -131,12 +128,4 @@ struct ToggleParameterView: View {
   var body: some View {
     Toggle(parameterName, isOn: $value)
   }
-}
-
-#Preview {
-  SettingsTabView(appSettings: AppSettings(), appCoordinator: AppCoordinator())
-    .modelContainer(for: [Period.self, PeriodInterval.self])
-    .environment(TimerManager(settingsManager: SettingsManager.shared))
-    .environment(AppSettings(settingsManager: .shared))
-    .tint(.purple.mix(with: .red, by: 0.6))
 }
