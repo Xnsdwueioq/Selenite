@@ -11,18 +11,22 @@ import SwiftData
 struct StatisticsTabView: View {
   var body: some View {
     NavigationStack {
-      Form {
-        NavigationLink("История сессий", value: StatisticsScreen.sessionList)
-        
-      }
-      .navigationDestination(for: StatisticsScreen.self) { screen in
-        switch screen {
-        case .sessionList:
-          SessionListView()
-        case .sessionEdit(let session):
-          SessionEditView(session: session)
+      StatisticsView()
+        .toolbar {
+          ToolbarItem(placement: .automatic) {
+            NavigationLink(value: StatisticsScreen.sessionList) {
+              Image(systemName: "list.bullet")
+            }
+          }
         }
-      }
+        .navigationDestination(for: StatisticsScreen.self) { screen in
+          switch screen {
+          case .sessionList:
+            SessionListView()
+          case .sessionEdit(let session):
+            SessionEditView(session: session)
+          }
+        }
     }
   }
 }

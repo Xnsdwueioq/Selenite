@@ -13,12 +13,13 @@ struct StatisticsView: View {
   @State private var viewModel: StatisticsViewModel?
   
   var body: some View {
-    Group {
+    VStack {
       if let viewModel {
-        if !viewModel.sessions.isEmpty {
+        @Bindable var viewModel = viewModel
+        if !viewModel.filteredSessions.isEmpty {
           ChartsView(viewModel: viewModel)
         } else {
-          ContentUnavailableView("Список записей пуст", systemImage: "info.circle.text.page.fill", description: Text("Выполните свою первую сессию чтобы увидеть статистику"))
+          ContentUnavailableView("Список записей пуст", systemImage: "info.text.page", description: Text("Выполните свою первую сессию чтобы увидеть статистику"))
         }
       } else {
         ContentUnavailableView("Не удалось загрузить данные", systemImage: "exclamationmark.triangle.text.page.fill")

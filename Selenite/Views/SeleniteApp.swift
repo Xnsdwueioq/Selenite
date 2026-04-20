@@ -18,3 +18,8 @@ struct SeleniteApp: App {
     .modelContainer(for: [Period.self, PeriodInterval.self])
   }
 }
+
+#Preview {
+  ContentView()
+    .modelContainer(for: [Period.self, PeriodInterval.self])
+}

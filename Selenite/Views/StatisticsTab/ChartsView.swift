@@ -12,8 +12,93 @@ import Charts
 struct ChartsView: View {
   @Bindable var viewModel: StatisticsViewModel
   
+  private let chartPalette: [Color] = [.blue, .purple, .pink, .orange, .yellow, .green, .mint]
+  
   var body: some View {
-    
+    Group {
+      Chart(viewModel.groupedSessions) { group in
+        SectorMark(
+          angle: .value("Длительность", group.totalDuration),
+          innerRadius: .ratio(0.6),
+          angularInset: 2
+        )
+        .foregroundStyle(by: .value("Название", group.title))
+        .cornerRadius(4)
+        .opacity(viewModel.selectedGroupName == nil || viewModel.selectedGroupName == group.title ? 1.0 : 0.5)
+      }
+      .frame(height: 250)
+      .padding()
+      .chartForegroundStyleScale(range: chartPalette)
+      .chartLegend(.hidden)
+      .chartAngleSelection(value: $viewModel.selectedGroupName)
+      
+      if let selected = viewModel.selectedGroupName {
+        VStack {
+          Text(selected)
+            .font(.headline)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .frame(width: 100)
+          
+          if let group = viewModel.groupedSessions.first(where: { $0.title == selected }) {
+            Text(calculatePercentage(for: group.totalDuration))
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+          }
+        }
+      }
+      
+      List {
+        Section {
+          Picker("Период", selection: $viewModel.selectedTimeRange.animation(.snappy)) {
+            ForEach(StatisticsViewModel.TimeRange.allCases, id: \.self) { range in
+              Text(range.rawValue).tag(range)
+            }
+          }
+          .pickerStyle(.segmented)
+          ForEach(Array(viewModel.groupedSessions.enumerated()), id: \.element.id) { index, group in
+            HStack {
+              Circle()
+                .fill(chartPalette[index % chartPalette.count])
+                .frame(width: 8, height: 8)
+              
+              VStack(alignment: .leading) {
+                Text(group.title)
+                  .font(.headline)
+                Text(formatTime(group.totalDuration))
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+              
+              Spacer()
+              
+              Text(calculatePercentage(for: group.totalDuration))
+                .font(.body.monospacedDigit())
+                .fontWeight(.semibold)
+                .foregroundStyle(.purpleBrand)
+            }
+          }
+        }
+        .listStyle(.insetGrouped)
+      }
+    }
+    .onChange(of: viewModel.selectedTimeRange) { viewModel.selectedGroupName = nil }
+  }
+  
+  // MARK: - Helpers
+  
+  private func calculatePercentage(for duration: TimeInterval) -> String {
+    let total = viewModel.totalPeriodDuration
+    guard total > 0 else { return "0%" }
+    let percentage = (duration / total) * 100
+    return String(format: "%.1f%%", percentage)
+  }
+  
+  private func formatTime(_ interval: TimeInterval) -> String {
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = [.hour, .minute]
+    formatter.unitsStyle = .abbreviated
+    return formatter.string(from: interval) ?? "0м"
   }
 }
 
@@ -47,7 +132,6 @@ struct ChartsView: View {
     session2.intervals = [interval2a, interval2b]
     session2.fragmentedType = session2.calculateFragmentedType
     
-    // 3. Сессия без названия (проверка заглушки)
     let session3 = Period(title: "Glad to see u", startDate: now.addingTimeInterval(-10800))
     let interval3 = PeriodInterval(
       startTime: now.addingTimeInterval(-10800),

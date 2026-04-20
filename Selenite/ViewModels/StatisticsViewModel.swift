@@ -30,8 +30,8 @@ final class StatisticsViewModel {
     
     return sessions.filter { session in
       switch selectedTimeRange {
-      case .day:
-        return calendar.isDate(session.startDate, inSameDayAs: now)
+        //      case .day:
+        //        return calendar.isDate(session.startDate, inSameDayAs: now)
       case .week:
         return calendar.isDate(session.startDate, equalTo: now, toGranularity: .weekOfYear)
       case .month:
@@ -47,10 +47,32 @@ final class StatisticsViewModel {
   var selectedTimeRange: TimeRange = .week
   
   enum TimeRange: String, CaseIterable {
-    case day = "День"
+    //    case day = "День"
     case week = "Неделя"
     case month = "Месяц"
     case year = "Год"
     case allTime = "Все время"
+  }
+  
+  var selectedGroupName: String? = nil
+}
+
+struct GroupedSession: Identifiable {
+  let id = UUID()
+  let title: String
+  let totalDuration: TimeInterval
+}
+
+extension StatisticsViewModel {
+  var groupedSessions: [GroupedSession] {
+    let groups = Dictionary(grouping: filteredSessions) { $0.title }
+    return groups.map { (title, periods) in
+      let total = periods.reduce(0) { $0 + $1.periodDuration }
+      return GroupedSession(title: title, totalDuration: total)
+    }.sorted { $0.totalDuration > $1.totalDuration }
+  }
+  
+  var totalPeriodDuration: TimeInterval {
+    filteredSessions.reduce(0) { $0 + $1.periodDuration }
   }
 }

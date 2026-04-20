@@ -91,7 +91,7 @@ final class TimerManager {
       sessionDuration = settingsManager.longBreakDuration
     }
     
-    let newPeriod = Period(title: sessionTitle, startDate: Date(), targetDuration: TimeInterval(sessionDuration))
+    let newPeriod = Period(title: sessionTitle, startDate: Date(), targetDuration: TimeInterval(sessionDuration) * 60)
     activePeriod = newPeriod
     
     switch periodType {
@@ -397,11 +397,11 @@ final class TimerManager {
       var remainingTime: Int
       switch periodType {
       case .session:
-        remainingTime = settingsManager.sessionDuration
+        remainingTime = settingsManager.sessionDuration * 60
       case .shortBreak:
-        remainingTime = settingsManager.shortBreakDuration
+        remainingTime = settingsManager.shortBreakDuration * 60
       case .longBreak:
-        remainingTime = settingsManager.longBreakDuration
+        remainingTime = settingsManager.longBreakDuration * 60
       }
       return TimeInterval(remainingTime)
     }
