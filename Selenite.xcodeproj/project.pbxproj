@@ -6,6 +6,11 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B762D7642FFFB856007BAF01 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = B762D7632FFFB856007BAF01 /* .gitignore */; };
+		B7F8AE852FFFA7B200BCB769 /* FocusCore in Frameworks */ = {isa = PBXBuildFile; productRef = B7F8AE842FFFA7B200BCB769 /* FocusCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B7F8AE622FFE9B1C00BCB769 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B762D7632FFFB856007BAF01 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		B7F8AE522FFE9B1B00BCB769 /* Selenite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Selenite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F8AE612FFE9B1C00BCB769 /* SeleniteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SeleniteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F8AE6B2FFE9B1C00BCB769 /* SeleniteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SeleniteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -45,12 +51,18 @@
 			path = SeleniteUITests;
 			sourceTree = "<group>";
 		};
+		B7F8AE862FFFA7BE00BCB769 /* Packages */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Packages;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		B7F8AE4F2FFE9B1B00BCB769 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				B7F8AE852FFFA7B200BCB769 /* FocusCore in Frameworks */,
 			);
 		};
 		B7F8AE5E2FFE9B1C00BCB769 /* Frameworks */ = {
@@ -69,10 +81,13 @@
 		B7F8AE492FFE9B1B00BCB769 = {
 			isa = PBXGroup;
 			children = (
+				B7F8AE862FFFA7BE00BCB769 /* Packages */,
 				B7F8AE542FFE9B1B00BCB769 /* Selenite */,
 				B7F8AE642FFE9B1C00BCB769 /* SeleniteTests */,
 				B7F8AE6E2FFE9B1C00BCB769 /* SeleniteUITests */,
+				B7F8AE832FFFA7B200BCB769 /* Frameworks */,
 				B7F8AE532FFE9B1B00BCB769 /* Products */,
+				B762D7632FFFB856007BAF01 /* .gitignore */,
 			);
 			sourceTree = "<group>";
 		};
@@ -84,6 +99,13 @@
 				B7F8AE6B2FFE9B1C00BCB769 /* SeleniteUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B7F8AE832FFFA7B200BCB769 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -101,8 +123,12 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B7F8AE542FFE9B1B00BCB769 /* Selenite */,
+				B7F8AE862FFFA7BE00BCB769 /* Packages */,
 			);
 			name = Selenite;
+			packageProductDependencies = (
+				B7F8AE842FFFA7B200BCB769 /* FocusCore */,
+			);
 			productName = Selenite;
 			productReference = B7F8AE522FFE9B1B00BCB769 /* Selenite.app */;
 			productType = "com.apple.product-type.application";
@@ -197,6 +223,7 @@
 		B7F8AE502FFE9B1B00BCB769 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				B762D7642FFFB856007BAF01 /* .gitignore in Resources */,
 			);
 		};
 		B7F8AE5F2FFE9B1C00BCB769 /* Resources */ = {
@@ -554,6 +581,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B7F8AE842FFFA7B200BCB769 /* FocusCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FocusCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B7F8AE4A2FFE9B1B00BCB769 /* Project object */;
 	validationLevel = 1;
