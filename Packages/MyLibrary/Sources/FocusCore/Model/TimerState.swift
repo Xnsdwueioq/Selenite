@@ -13,6 +13,12 @@ public struct TimerState: Codable, Sendable, Equatable {
   public var workedIntervals: [DateInterval] = []
   public var currentIntervalStart: Date?
   
+  public init(
+    config: TimerConfig,
+  ) {
+    self.config = config
+  }
+  
   public var phaseDuration: TimeInterval? {
     return config.duration(of: phase)
   }

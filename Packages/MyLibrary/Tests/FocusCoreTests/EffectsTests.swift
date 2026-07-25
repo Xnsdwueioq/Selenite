@@ -9,7 +9,6 @@ import Testing
 @testable import FocusCore
 
 @Suite struct EffectsTests {
-
   static let now = Date(timeIntervalSince1970: 1_720_000_000)
   static let config = TimerConfig(
     sessionCount: 4,
