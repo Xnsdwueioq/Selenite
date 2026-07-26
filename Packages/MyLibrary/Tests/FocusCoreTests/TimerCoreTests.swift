@@ -346,6 +346,20 @@ import Testing
     #expect(s.completedIndices.isEmpty)
   }
 
+  // finished + skipForward → свежий idle нового цикла (UI прячет остальные кнопки в finished).
+  @Test func skipForwardFromFinishedResetsToFreshIdle() {
+    var state = TimerState(config: Self.config)
+    state.phase = .finished
+    state.completedIndices = [0, 1, 2, 3]
+
+    let (s, effects) = TimerCore.reduce(state, .skipForward(saveCurrent: true), context: ctx(Self.now))
+
+    #expect(s.phase == .idle)
+    #expect(s.completedIndices.isEmpty)
+    #expect(s.config == Self.config)
+    #expect(effects.contains(.cancelNotifications))
+  }
+
   // MARK: - skipBackward: рестарт текущей / шаг назад / no-op
 
   // Идущая работа → рестарт текущей (awaiting той же), попытка отброшена, прогресс не тронут.

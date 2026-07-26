@@ -11,7 +11,6 @@ import FocusCore
   func run(_ effects: [TimerEffect]) async
 }
 
-
 @MainActor
 final class EffectRunner: EffectRunning {
   func run(_ effects: [TimerEffect]) async {

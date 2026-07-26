@@ -193,9 +193,15 @@ public enum TimerCore {
       
       let next = PhaseSequence.next(after: state.phase, config: state.config)   // .finished
       newState = advance(newState, to: next, now: now, autoStart: false)
-      
+
       return (newState, effects(after: newState, notifications: .cancel))
-      
+
+      // MARK: - FINISHED + SKIP_FORWARD
+    case (.finished, .skipForward):
+      let newState = TimerState(config: state.config)
+
+      return (newState, effects(after: newState, notifications: .cancel))
+
       // MARK: - WORK + SKIP_BACKWARD
     case (.work(index: let index), .skipBackward(saveCurrent: let saveCurrent)):
       var newState = state

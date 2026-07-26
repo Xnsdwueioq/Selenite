@@ -114,6 +114,23 @@ import Testing
     #expect(Schedule.boundaries(for: state, now: Self.now) == [])
   }
 
+  @Test func passedBoundaryReturnsEmptyPlan() {
+    var state = TimerState(config: Self.smallConfig)
+    state.phase = .work(index: 0)
+    state.currentIntervalStart = Self.now
+
+    #expect(Schedule.boundaries(for: state, now: Self.now.addingTimeInterval(100)) == [])
+  }
+
+  @Test func boundaryExactlyAtNowBelongsToReconcileNotSchedule() {
+    var state = TimerState(config: Self.smallConfig)
+    state.phase = .work(index: 0)
+    state.currentIntervalStart = Self.now
+
+    #expect(Schedule.boundaries(for: state, now: Self.now.addingTimeInterval(25)) == [])
+    #expect(state.currentBoundaryDate == Self.now.addingTimeInterval(25))
+  }
+
   // MARK: - Авто-режим: цепочка границ до .finished
 
   static var smallConfig: TimerConfig {

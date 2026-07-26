@@ -38,8 +38,7 @@ extension TimerConfig {
     case .work:               return self.sessionDuration
     case .shortBreak:         return self.shortBreakDuration
     case .longBreak:          return self.longBreakDuration
-    case .awaiting(let next): return duration(of: next)
-    case .idle, .finished:    return nil
+    case .idle, .finished, .awaiting:    return nil
     }
   }
 }

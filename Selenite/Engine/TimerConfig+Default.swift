@@ -10,7 +10,7 @@ import FocusCore
 extension TimerConfig {
   static let `default` = TimerConfig(
     sessionCount: 4,
-    sessionDuration: 25,
+    sessionDuration: 6,
     shortBreaksEnabled: true,
     shortBreakDuration: 5,
     longBreaksEnabled: true,

@@ -14,13 +14,7 @@ enum Schedule {
   /// - Авто-режим: вся цепочка до `.finished` включительно.
   /// - Пауза / `idle` / `awaiting` / `finished`: пустой план (границ нет).
   static func boundaries(for state: TimerState, now: Date) -> [PhaseBoundary] {
-    switch state.phase {
-    case .idle, .awaiting, .finished:
-      return []
-    case .work, .shortBreak, .longBreak:
-      break
-    }
-    guard !state.isPaused, let remaining = state.remaining(at: now) else { return [] }
+    guard let firstBoundary = state.currentBoundaryDate, firstBoundary > now else { return [] }
 
     let config = state.config
     var boundaries: [PhaseBoundary] = []
@@ -28,7 +22,7 @@ enum Schedule {
     // Ближайшая граница — конец текущей фазы.
     boundaries.append(
       PhaseBoundary(
-        completionAt: now + remaining,
+        completionAt: firstBoundary,
         nextPhase: PhaseSequence.next(after: state.phase, config: config)
       )
     )
