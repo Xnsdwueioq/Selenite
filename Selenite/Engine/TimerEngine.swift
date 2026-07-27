@@ -21,11 +21,12 @@ final class TimerEngine {
 
   init(
     effectRunner: EffectRunning,
+    snapshotReader: SnapshotReading,
     timerConfig: @escaping () -> TimerConfig,
     now: @escaping () -> Date,
     makeID: @escaping @Sendable () -> UUID
   ) {
-    self.state = TimerState(config: timerConfig())
+    self.state = snapshotReader.read() ?? TimerState(config: timerConfig())
     self.effectRunner = effectRunner
     self.timerConfig = timerConfig
     self.now = now
@@ -38,7 +39,7 @@ final class TimerEngine {
     
     scheduleBoundary(for: newState)
     state = newState
-    await effectRunner.run(effects)
+    effectRunner.run(effects)
   }
   
   func reconcile() async {
@@ -47,7 +48,7 @@ final class TimerEngine {
     
     scheduleBoundary(for: newState)
     state = newState
-    await effectRunner.run(effects)
+    effectRunner.run(effects)
   }
   
   private func scheduleBoundary(for newState: TimerState) {

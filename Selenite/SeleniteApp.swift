@@ -9,7 +9,10 @@ struct SeleniteApp: App {
   
   // TODO: Заполнение TimerConfig из SettingsStore
   @State private var timerEngine = TimerEngine(
-    effectRunner: EffectRunner(),
+    effectRunner: EffectRunner(
+      snapshotWriter: SharedSnapshotStore()
+    ),
+    snapshotReader: SharedSnapshotStore(),
     timerConfig: { TimerConfig.default },
     now: { Date() },
     makeID: { UUID() }

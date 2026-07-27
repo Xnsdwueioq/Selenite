@@ -102,7 +102,10 @@ struct TimerView: View {
 
 #Preview {
   let timerEngine = TimerEngine(
-    effectRunner: EffectRunner(),
+    effectRunner: EffectRunner(
+      snapshotWriter: SharedSnapshotStore()
+    ),
+    snapshotReader: SharedSnapshotStore(),
     timerConfig: { TimerConfig.default },
     now: { Date() },
     makeID: { UUID() }
