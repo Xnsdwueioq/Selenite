@@ -20,9 +20,14 @@ final class EffectRunner: EffectRunning {
   private var tail: Task<Void, Never>?
   
   private let snapshotWriter: SnapshotWriting
+  private let notificationScheduler: NotificationScheduling
   
-  init(snapshotWriter: SnapshotWriting) {
+  init(
+    snapshotWriter: SnapshotWriting,
+    notificationScheduler: NotificationScheduling
+  ) {
     self.snapshotWriter = snapshotWriter
+    self.notificationScheduler = notificationScheduler
   }
 
   func run(_ effects: [TimerEffect]) {
@@ -51,7 +56,7 @@ final class EffectRunner: EffectRunning {
   private func perform(_ effect: TimerEffect) async {
     switch effect {
     case .persistSnapshot(let state):
-      Logger.effects.debug("persistSnapshot")
+      Logger.effects.debug("The 'persistSnapshot' effect was triggered")
       await snapshotWriter.write(state)
 
     case .saveCompleted:
@@ -61,11 +66,13 @@ final class EffectRunner: EffectRunning {
       // TODO: Гейтить эффект
       Logger.effects.debug("addCalendarEvent — TODO: гейт по настройке")
 
-    case .rescheduleNotifications:
-      Logger.effects.debug("rescheduleNotifications — TODO")
+    case .rescheduleNotifications(let boundaries):
+      Logger.effects.debug("The 'rescheduleNotifications' effect was triggered")
+      await notificationScheduler.reschedule(to: boundaries)
 
     case .cancelNotifications:
-      Logger.effects.debug("cancelNotifications — TODO")
+      Logger.effects.debug("The 'cancelNotifications' effect was triggered")
+      await notificationScheduler.cancelAll()
 
     case .syncLiveActivity:
       Logger.effects.debug("syncLiveActivity — TODO")
