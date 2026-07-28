@@ -14,8 +14,7 @@ struct LocalNotificationScheduler: NotificationScheduling {
   private let notificationCenter = UNUserNotificationCenter.current()
   
   func reschedule(to boundaries: [PhaseBoundary]) async {
-    for boundary in boundaries {
-    }
+    
   }
   
   func cancelAll() async {

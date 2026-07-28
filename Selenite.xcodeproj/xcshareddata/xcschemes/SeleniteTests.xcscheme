@@ -6,21 +6,6 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
-      <BuildActionEntries>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B7F8AE512FFE9B1B00BCB769"
-               BuildableName = "Selenite.app"
-               ReferencedContainer = "container:Selenite.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-      </BuildActionEntries>
    </BuildAction>
    <TestAction
       buildConfiguration = "Debug"
@@ -36,7 +21,6 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B7F8AE602FFE9B1C00BCB769"
                BuildableName = "SeleniteTests.xctest"
-               BlueprintName = "SeleniteTests"
                ReferencedContainer = "container:Selenite.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -63,15 +47,6 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       queueDebuggingEnabled = "No">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B7F8AE512FFE9B1B00BCB769"
-            BuildableName = "Selenite.app"
-            ReferencedContainer = "container:Selenite.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -79,15 +54,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B7F8AE512FFE9B1B00BCB769"
-            BuildableName = "Selenite.app"
-            ReferencedContainer = "container:Selenite.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

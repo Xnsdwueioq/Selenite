@@ -8,7 +8,7 @@
 import FocusCore
 import Foundation
 
-extension Phase {
+nonisolated extension Phase {
   var displayName: String {
     switch self {
     case .work:

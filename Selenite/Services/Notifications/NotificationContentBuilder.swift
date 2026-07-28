@@ -8,7 +8,7 @@
 import Foundation
 import FocusCore
 
-enum NotificationContentBuilder {
+nonisolated enum NotificationContentBuilder {
 
   static func content(for boundary: PhaseBoundary) -> (title: String, body: String) {
     (title(for: boundary), body(for: boundary))
@@ -45,6 +45,6 @@ enum NotificationContentBuilder {
 
     return boundary.nextPhaseStartsAutomatically
       ? String(localized: "notification.body.autoNext", defaultValue: "Начинается: \(detail)")
-      : String(localized: "notification.body.manualNext", defaultValue: "Дальше: \(detail)")
+      : String(localized: "notification.body.manualNext", defaultValue: "Далее: \(detail)")
   }
 }
