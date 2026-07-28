@@ -17,6 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B7F8AE512FFE9B1B00BCB769"
                BuildableName = "Selenite.app"
+               BlueprintName = "Selenite"
                ReferencedContainer = "container:Selenite.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -69,6 +70,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B7F8AE512FFE9B1B00BCB769"
             BuildableName = "Selenite.app"
+            BlueprintName = "Selenite"
             ReferencedContainer = "container:Selenite.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -85,6 +87,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B7F8AE512FFE9B1B00BCB769"
             BuildableName = "Selenite.app"
+            BlueprintName = "Selenite"
             ReferencedContainer = "container:Selenite.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
