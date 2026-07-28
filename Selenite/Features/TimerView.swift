@@ -104,7 +104,7 @@ struct TimerView: View {
   let timerEngine = TimerEngine(
     effectRunner: EffectRunner(
       snapshotWriter: SharedSnapshotStore(),
-      notificationScheduler: LocalNotificationScheduler()
+      notificationScheduler: LocalNotificationScheduler(now: { Date() })
     ),
     snapshotReader: SharedSnapshotStore(),
     timerConfig: { TimerConfig.default },

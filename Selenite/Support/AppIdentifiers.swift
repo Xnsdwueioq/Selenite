@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AppIdentifiers {
+nonisolated enum AppIdentifiers {
   static let appGroup = "group.com.sye7qjm3ac.selenite"
   static let bundle = Bundle.main.bundleIdentifier ?? "com.sye7qjm3ac.Selenite"
 }

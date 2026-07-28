@@ -39,6 +39,7 @@
 		B72CD3F6301881160005D214 /* Exceptions for "SeleniteTests" folder in "SeleniteTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				LocalNotificationSchedulerTests.swift,
 				NotificationContentBuilderTests.swift,
 			);
 			target = B7F8AE602FFE9B1C00BCB769 /* SeleniteTests */;
