@@ -29,7 +29,13 @@ import Testing
     let boundaries = Schedule.boundaries(for: state, now: Self.now.addingTimeInterval(10))
 
     #expect(boundaries == [
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(25), nextPhase: .shortBreak(afterIndex: 0))
+      PhaseBoundary(
+        endingPhase: .work(index: 0),
+        completionAt: Self.now.addingTimeInterval(25),
+        nextPhase: .shortBreak(afterIndex: 0),
+        nextPhaseDuration: 30,
+        nextPhaseStartsAutomatically: false
+      )
     ])
   }
 
@@ -71,7 +77,13 @@ import Testing
 
     // осталось 25 - 5 = 20 сек от момента возобновления
     #expect(boundaries == [
-      PhaseBoundary(completionAt: resumeAt.addingTimeInterval(20), nextPhase: .shortBreak(afterIndex: 0))
+      PhaseBoundary(
+        endingPhase: .work(index: 0),
+        completionAt: resumeAt.addingTimeInterval(20),
+        nextPhase: .shortBreak(afterIndex: 0),
+        nextPhaseDuration: 30,
+        nextPhaseStartsAutomatically: false
+      )
     ])
   }
 
@@ -155,10 +167,34 @@ import Testing
     let boundaries = Schedule.boundaries(for: state, now: Self.now)
 
     #expect(boundaries == [
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(25), nextPhase: .shortBreak(afterIndex: 0)),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(55), nextPhase: .work(index: 1)),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(80), nextPhase: .longBreak),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(140), nextPhase: .finished),
+      PhaseBoundary(
+        endingPhase: .work(index: 0),
+        completionAt: Self.now.addingTimeInterval(25),
+        nextPhase: .shortBreak(afterIndex: 0),
+        nextPhaseDuration: 30,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .shortBreak(afterIndex: 0),
+        completionAt: Self.now.addingTimeInterval(55),
+        nextPhase: .work(index: 1),
+        nextPhaseDuration: 25,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .work(index: 1),
+        completionAt: Self.now.addingTimeInterval(80),
+        nextPhase: .longBreak,
+        nextPhaseDuration: 60,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .longBreak,
+        completionAt: Self.now.addingTimeInterval(140),
+        nextPhase: .finished,
+        nextPhaseDuration: nil,
+        nextPhaseStartsAutomatically: true
+      ),
     ])
   }
 
@@ -171,9 +207,27 @@ import Testing
     let boundaries = Schedule.boundaries(for: state, now: Self.now)
 
     #expect(boundaries == [
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(30), nextPhase: .work(index: 1)),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(55), nextPhase: .longBreak),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(115), nextPhase: .finished),
+      PhaseBoundary(
+        endingPhase: .shortBreak(afterIndex: 0),
+        completionAt: Self.now.addingTimeInterval(30),
+        nextPhase: .work(index: 1),
+        nextPhaseDuration: 25,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .work(index: 1),
+        completionAt: Self.now.addingTimeInterval(55),
+        nextPhase: .longBreak,
+        nextPhaseDuration: 60,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .longBreak,
+        completionAt: Self.now.addingTimeInterval(115),
+        nextPhase: .finished,
+        nextPhaseDuration: nil,
+        nextPhaseStartsAutomatically: true
+      ),
     ])
   }
 
@@ -192,10 +246,34 @@ import Testing
     let boundaries = Schedule.boundaries(for: state, now: Self.now)
 
     #expect(boundaries == [
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(10), nextPhase: .work(index: 1)),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(20), nextPhase: .work(index: 2)),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(30), nextPhase: .longBreak),
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(50), nextPhase: .finished),
+      PhaseBoundary(
+        endingPhase: .work(index: 0),
+        completionAt: Self.now.addingTimeInterval(10),
+        nextPhase: .work(index: 1),
+        nextPhaseDuration: 10,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .work(index: 1),
+        completionAt: Self.now.addingTimeInterval(20),
+        nextPhase: .work(index: 2),
+        nextPhaseDuration: 10,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .work(index: 2),
+        completionAt: Self.now.addingTimeInterval(30),
+        nextPhase: .longBreak,
+        nextPhaseDuration: 20,
+        nextPhaseStartsAutomatically: true
+      ),
+      PhaseBoundary(
+        endingPhase: .longBreak,
+        completionAt: Self.now.addingTimeInterval(50),
+        nextPhase: .finished,
+        nextPhaseDuration: nil,
+        nextPhaseStartsAutomatically: true
+      ),
     ])
   }
 
@@ -215,7 +293,13 @@ import Testing
     let boundaries = Schedule.boundaries(for: state, now: Self.now)
 
     #expect(boundaries == [
-      PhaseBoundary(completionAt: Self.now.addingTimeInterval(15), nextPhase: .finished)
+      PhaseBoundary(
+        endingPhase: .work(index: 0),
+        completionAt: Self.now.addingTimeInterval(15),
+        nextPhase: .finished,
+        nextPhaseDuration: nil,
+        nextPhaseStartsAutomatically: true
+      )
     ])
   }
 

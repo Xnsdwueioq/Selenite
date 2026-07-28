@@ -26,7 +26,7 @@ struct SeleniteApp: App {
     }
     .environment(timerEngine)
     .onChange(of: scenePhase) { old, _ in
-      if old == .background {
+      if old != .active {
         Task { await timerEngine.reconcile() }
       }
     }
