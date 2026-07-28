@@ -20,10 +20,14 @@ enum Schedule {
     var boundaries: [PhaseBoundary] = []
 
     // Ближайшая граница — конец текущей фазы.
+    var nextPhase = PhaseSequence.next(after: state.phase, config: config)
     boundaries.append(
       PhaseBoundary(
+        endingPhase: state.phase,
         completionAt: firstBoundary,
-        nextPhase: PhaseSequence.next(after: state.phase, config: config)
+        nextPhase: nextPhase,
+        nextPhaseDuration: config.duration(of: nextPhase),
+        nextPhaseStartsAutomatically: config.autoAdvance
       )
     )
 
@@ -32,10 +36,15 @@ enum Schedule {
 
     while let last = boundaries.last, last.nextPhase != .finished {
       guard let duration = config.duration(of: last.nextPhase) else { break }
+      
+      nextPhase = PhaseSequence.next(after: last.nextPhase, config: config)
       boundaries.append(
         PhaseBoundary(
+          endingPhase: last.nextPhase,
           completionAt: last.completionAt + duration,
-          nextPhase: PhaseSequence.next(after: last.nextPhase, config: config)
+          nextPhase: nextPhase,
+          nextPhaseDuration: config.duration(of: nextPhase),
+          nextPhaseStartsAutomatically: config.autoAdvance
         )
       )
     }
