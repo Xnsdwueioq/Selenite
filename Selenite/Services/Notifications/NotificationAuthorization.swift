@@ -8,50 +8,73 @@
 import UserNotifications
 import OSLog
 
-nonisolated enum NotificationStatusResponse {
-  case notDetermined
-  case authorizedWithSound
-  case authorizedWithoutSound
-  case denied
+nonisolated enum NotificationAuthorizationStatus {
+  case notDetermined, authorized, denied
+}
+
+nonisolated enum NotificationDeliveryIssue: CaseIterable {
+  case scheduledDelivery, alertsDisabled, soundDisabled, lockScreenDisabled
+}
+
+nonisolated struct NotificationStatus: Equatable {
+  var authorization: NotificationAuthorizationStatus
+  var issues: Set<NotificationDeliveryIssue> = []
+}
+
+nonisolated struct NotificationSettingsSnapshot {
+  var authorizationStatus: UNAuthorizationStatus
+  var alertSetting: UNNotificationSetting
+  var soundSetting: UNNotificationSetting
+  var lockScreenSetting: UNNotificationSetting
+  var scheduledDeliverySetting: UNNotificationSetting
 }
 
 nonisolated enum NotificationAuthorization {
-  static func requestAuthorization() async -> NotificationStatusResponse {
+  static func requestAuthorization() async -> NotificationStatus {
     do {
       try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
-      
     } catch {
       Logger.notifications.error("Permission retrieval error: \(error.localizedDescription)")
     }
-    
-    let (authorizationStatus, soundSetting) = await settings()
-    return status(authorizationStatus: authorizationStatus, soundSetting: soundSetting)
+
+    return await current()
   }
-  
-  static func settings() async -> (UNAuthorizationStatus, UNNotificationSetting) {
+
+  static func current() async -> NotificationStatus {
+    status(for: await settings())
+  }
+
+  static func status(for settings: NotificationSettingsSnapshot) -> NotificationStatus {
+    switch settings.authorizationStatus {
+    case .notDetermined:
+      NotificationStatus(authorization: .notDetermined)
+    case .denied:
+      NotificationStatus(authorization: .denied)
+    case .authorized, .provisional, .ephemeral:
+      NotificationStatus(authorization: .authorized, issues: issues(for: settings))
+    @unknown default:
+      NotificationStatus(authorization: .denied)
+    }
+  }
+
+  private static func issues(for settings: NotificationSettingsSnapshot) -> Set<NotificationDeliveryIssue> {
+    var issues: Set<NotificationDeliveryIssue> = []
+    if settings.scheduledDeliverySetting == .enabled { issues.insert(.scheduledDelivery) }
+    if settings.alertSetting == .disabled { issues.insert(.alertsDisabled) }
+    if settings.soundSetting == .disabled { issues.insert(.soundDisabled) }
+    if settings.lockScreenSetting == .disabled { issues.insert(.lockScreenDisabled) }
+    return issues
+  }
+
+  private static func settings() async -> NotificationSettingsSnapshot {
     let settings = await UNUserNotificationCenter.current().notificationSettings()
 
-    let soundSetting = settings.soundSetting
-    let authorizationStatus = settings.authorizationStatus
-    
-    return (authorizationStatus, soundSetting)
-  }
-  
-  static func status(
-    authorizationStatus: UNAuthorizationStatus,
-    soundSetting: UNNotificationSetting
-  ) -> NotificationStatusResponse {
-    switch authorizationStatus {
-    case .notDetermined: return .notDetermined
-    case .denied: return .denied
-    case .authorized:
-      if soundSetting == .enabled {
-        return .authorizedWithSound
-      } else {
-        return .authorizedWithoutSound
-      }
-    case .provisional, .ephemeral: return .authorizedWithoutSound
-    @unknown default: return .denied
-    }
+    return NotificationSettingsSnapshot(
+      authorizationStatus: settings.authorizationStatus,
+      alertSetting: settings.alertSetting,
+      soundSetting: settings.soundSetting,
+      lockScreenSetting: settings.lockScreenSetting,
+      scheduledDeliverySetting: settings.scheduledDeliverySetting
+    )
   }
 }

@@ -18,16 +18,26 @@ struct SeleniteApp: App {
     now: { Date() },
     makeID: { UUID() }
   )
+  @State private var notificationStatusStore = NotificationStatusStore()
+  private let appFlags = AppFlags()
   
   var body: some Scene {
     WindowGroup {
       ContentView()
-        .task { await timerEngine.reconcile() }
+        .task {
+          await timerEngine.reconcile()
+          await notificationStatusStore.refresh()
+        }
     }
     .environment(timerEngine)
-    .onChange(of: scenePhase) { old, _ in
-      if old != .active {
-        Task { await timerEngine.reconcile() }
+    .environment(notificationStatusStore)
+    .environment(\.appFlags, appFlags)
+    .onChange(of: scenePhase) { _, new in
+      if new == .active {
+        Task {
+          await timerEngine.reconcile()
+          await notificationStatusStore.refresh()
+        }
       }
     }
   }

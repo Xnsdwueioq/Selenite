@@ -10,6 +10,10 @@ import FocusCore
 
 struct TimerView: View {
   @Environment(TimerEngine.self) private var timerEngine
+  @Environment(\.appFlags) private var appFlags
+  @Environment(NotificationStatusStore.self) private var notificationStatusStore
+  
+  @State private var isNotificationsExplaining = false
   
   private var state: TimerState {
     timerEngine.state
@@ -17,6 +21,7 @@ struct TimerView: View {
   
   var body: some View {
     VStack {
+      NotificationStatusWarningView(status: notificationStatusStore.status)
       timeDisplay
         .font(.largeTitle)
         .fontDesign(.rounded)
@@ -27,6 +32,22 @@ struct TimerView: View {
       } else {
         controls.buttonStyle(.borderedProminent)
       }
+    }
+    .sheet(
+      isPresented: $isNotificationsExplaining
+    ) {
+      NotificationExplainingView(
+        notNow: {
+          isNotificationsExplaining = false
+        },
+        submit: {
+          isNotificationsExplaining = false
+          Task {
+            await notificationStatusStore.requestAuthorization()
+          }
+        }
+      )
+      .presentationDetents([.medium])
     }
   }
 
@@ -61,7 +82,10 @@ struct TimerView: View {
   
   private var toggleButton: some View {
     Button {
-      Task { await timerEngine.send(.toggle) }
+      Task {
+        await timerEngine.send(.toggle)
+        await offerNotificationsIfNeeded()
+      }
     } label: {
       Image(systemName: state.isRunning ? "pause" : "play")
     }
@@ -98,6 +122,15 @@ struct TimerView: View {
       format: .time(pattern: .minuteSecond(padMinuteToLength: 2))
     )
   }
+  
+  private func offerNotificationsIfNeeded() async {
+    let notificationStatus = await NotificationAuthorization.current()
+    if !appFlags.didExplainNotifications
+        && notificationStatus.authorization == .notDetermined {
+      appFlags.didExplainNotifications = true
+      isNotificationsExplaining = true
+    }
+  }
 }
 
 #Preview {
@@ -113,4 +146,6 @@ struct TimerView: View {
   )
   TimerView()
     .environment(timerEngine)
+    .environment(NotificationStatusStore())
+    .environment(\.appFlags, AppFlags(store: UserDefaults(suiteName: UUID().uuidString)!))
 }

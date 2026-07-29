@@ -42,6 +42,7 @@
 				LocalNotificationSchedulerTests.swift,
 				NotificationAuthorizationTests.swift,
 				NotificationContentBuilderTests.swift,
+				NotificationDeliveryIssuePriorityTests.swift,
 			);
 			target = B7F8AE602FFE9B1C00BCB769 /* SeleniteTests */;
 		};

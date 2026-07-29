@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
+
+extension EnvironmentValues {
+  @Entry var appFlags = AppFlags()
+}
 
 nonisolated struct AppFlags {
   private let store: UserDefaults
