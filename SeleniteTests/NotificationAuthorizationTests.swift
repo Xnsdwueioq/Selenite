@@ -25,6 +25,7 @@ struct NotificationAuthorizationTests {
     alert: UNNotificationSetting = .enabled,
     sound: UNNotificationSetting = .enabled,
     lockScreen: UNNotificationSetting = .enabled,
+    notificationCenter: UNNotificationSetting = .enabled,
     scheduledDelivery: UNNotificationSetting = .disabled
   ) -> NotificationSettingsSnapshot {
     NotificationSettingsSnapshot(
@@ -32,7 +33,8 @@ struct NotificationAuthorizationTests {
       alertSetting: alert,
       soundSetting: sound,
       lockScreenSetting: lockScreen,
-      scheduledDeliverySetting: scheduledDelivery
+      scheduledDeliverySetting: scheduledDelivery,
+      notificationCenterSetting: notificationCenter
     )
   }
 
@@ -73,6 +75,11 @@ struct NotificationAuthorizationTests {
       expected: NotificationStatus(authorization: .authorized, issues: [.lockScreenDisabled])
     ),
     Case(
+      name: "центр уведомлений выключен",
+      settings: settings(.authorized, notificationCenter: .disabled),
+      expected: NotificationStatus(authorization: .authorized, issues: [.notificationCenterDisabled])
+    ),
+    Case(
       name: "сводка по расписанию включена",
       settings: settings(.authorized, scheduledDelivery: .enabled),
       expected: NotificationStatus(authorization: .authorized, issues: [.scheduledDelivery])
@@ -84,11 +91,12 @@ struct NotificationAuthorizationTests {
         alert: .disabled,
         sound: .disabled,
         lockScreen: .disabled,
+        notificationCenter: .disabled,
         scheduledDelivery: .enabled
       ),
       expected: NotificationStatus(
         authorization: .authorized,
-        issues: [.alertsDisabled, .soundDisabled, .lockScreenDisabled, .scheduledDelivery]
+        issues: Set(NotificationDeliveryIssue.allCases)
       )
     ),
     Case(
@@ -97,7 +105,8 @@ struct NotificationAuthorizationTests {
         .authorized,
         alert: .notSupported,
         sound: .notSupported,
-        lockScreen: .notSupported
+        lockScreen: .notSupported,
+        notificationCenter: .notSupported
       ),
       expected: NotificationStatus(authorization: .authorized)
     ),

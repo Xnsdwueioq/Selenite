@@ -7,11 +7,11 @@
 
 import Foundation
 
-extension NotificationStatus {
+nonisolated extension NotificationStatus {
   var warningText: String? {
     switch authorization {
     case .authorized:
-      NotificationDeliveryIssue.mostSevere(in: issues)?.warningText
+      NotificationDeliveryIssue.warningText(for: self.issues)
       
     case .denied: String(
       localized: "notification.warning.denied",

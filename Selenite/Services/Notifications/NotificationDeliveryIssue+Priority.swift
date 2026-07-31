@@ -6,7 +6,7 @@
 //
 
 nonisolated extension NotificationDeliveryIssue {
-  static let bySeverity: [Self] = [.scheduledDelivery, .alertsDisabled, .soundDisabled, .lockScreenDisabled]
+  static let bySeverity: [Self] = [.scheduledDelivery, .soundDisabled, .alertsDisabled, .lockScreenDisabled, .notificationCenterDisabled]
   
   static func mostSevere(in issues: Set<Self>) -> Self? {
     bySeverity.first { issues.contains($0) }

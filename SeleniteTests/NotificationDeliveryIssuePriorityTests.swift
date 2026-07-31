@@ -43,9 +43,9 @@ struct NotificationDeliveryIssuePriorityTests {
       expected: .scheduledDelivery
     ),
     Case(
-      name: "баннеры важнее звука",
+      name: "звук важнее баннеров",
       issues: [.alertsDisabled, .soundDisabled],
-      expected: .alertsDisabled
+      expected: .soundDisabled
     ),
     Case(
       name: "баннеры важнее локскрина",
@@ -58,6 +58,11 @@ struct NotificationDeliveryIssuePriorityTests {
       expected: .soundDisabled
     ),
     Case(
+      name: "локскрин важнее центра уведомлений",
+      issues: [.lockScreenDisabled, .notificationCenterDisabled],
+      expected: .lockScreenDisabled
+    ),
+    Case(
       name: "тройка со сводкой",
       issues: [.alertsDisabled, .lockScreenDisabled, .scheduledDelivery],
       expected: .scheduledDelivery
@@ -65,7 +70,7 @@ struct NotificationDeliveryIssuePriorityTests {
     Case(
       name: "тройка без сводки",
       issues: [.alertsDisabled, .soundDisabled, .lockScreenDisabled],
-      expected: .alertsDisabled
+      expected: .soundDisabled
     ),
     Case(
       name: "сломано всё сразу",

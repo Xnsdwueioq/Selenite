@@ -13,7 +13,11 @@ nonisolated enum NotificationAuthorizationStatus {
 }
 
 nonisolated enum NotificationDeliveryIssue: CaseIterable {
-  case scheduledDelivery, alertsDisabled, soundDisabled, lockScreenDisabled
+  case scheduledDelivery
+  case alertsDisabled
+  case soundDisabled
+  case lockScreenDisabled
+  case notificationCenterDisabled
 }
 
 nonisolated struct NotificationStatus: Equatable {
@@ -27,6 +31,7 @@ nonisolated struct NotificationSettingsSnapshot {
   var soundSetting: UNNotificationSetting
   var lockScreenSetting: UNNotificationSetting
   var scheduledDeliverySetting: UNNotificationSetting
+  var notificationCenterSetting: UNNotificationSetting
 }
 
 nonisolated enum NotificationAuthorization {
@@ -63,6 +68,8 @@ nonisolated enum NotificationAuthorization {
     if settings.alertSetting == .disabled { issues.insert(.alertsDisabled) }
     if settings.soundSetting == .disabled { issues.insert(.soundDisabled) }
     if settings.lockScreenSetting == .disabled { issues.insert(.lockScreenDisabled) }
+    if settings.notificationCenterSetting == .disabled { issues.insert(.notificationCenterDisabled) }
+    
     return issues
   }
 
@@ -74,7 +81,8 @@ nonisolated enum NotificationAuthorization {
       alertSetting: settings.alertSetting,
       soundSetting: settings.soundSetting,
       lockScreenSetting: settings.lockScreenSetting,
-      scheduledDeliverySetting: settings.scheduledDeliverySetting
+      scheduledDeliverySetting: settings.scheduledDeliverySetting,
+      notificationCenterSetting: settings.notificationCenterSetting
     )
   }
 }
