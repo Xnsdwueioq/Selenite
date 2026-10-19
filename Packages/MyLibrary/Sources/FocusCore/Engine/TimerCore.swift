@@ -91,12 +91,37 @@ public enum TimerCore {
       
       return (newState, effects(after: newState, notifications: .reschedule(now: now)))
       
-      // MARK: - ANY + RESTART
+      // MARK: - WORK + RESTART
+    case (.work(index: let index), .restartCycle(let saveCurrent)):
+      var newState = state
+      if let start = newState.currentIntervalStart {
+        newState.workedIntervals.append(DateInterval(start: start, end: now))
+      }
+      newState.completedIndices.insert(index)
+      var completedSessions = [CompletedSession]()
+      if saveCurrent {
+        let completedSession = CompletedSession.create(
+          from: newState,
+          with: state.cycleID ?? context.makeID(),
+          terminationReason: .skipped,
+          sessionIndex: index
+        )
+        completedSessions.append(completedSession)
+      }
+      let clearState = TimerState(config: state.config)
+
+      return (clearState, effects(after: clearState, notifications: .cancel, saving: completedSessions))
+
+      // MARK: - [EXCEPT WORK] + RESTART
     case (_, .restartCycle):
-      let newState = TimerState(config: state.config)
-      
-      return (newState, effects(after: newState, notifications: .cancel))
-      
+      var newState = state
+      if let start = newState.currentIntervalStart {
+        newState.workedIntervals.append(DateInterval(start: start, end: now))
+      }
+      let clearState = TimerState(config: state.config)
+
+      return (clearState, effects(after: clearState, notifications: .cancel))
+
       // MARK: - [IDLE, AWAITING, WORK] + RENAME
     case (.idle, .rename(let newTitle)),
       (.awaiting(next: .work), .rename(let newTitle)),
@@ -300,17 +325,16 @@ public enum TimerCore {
 extension TimerCore {
   /// Что сделать с расписанием локальных уведомлений при переходе.
   enum Notifications {
-    /// Не трогать расписание (переход не меняет тайминг — напр. `rename`).
+    /// Не изменять расписание.
     case keep
-    /// Отменить все запланированные границы (уход из бегущей фазы).
+    /// Отменить все запланированные границы.
     case cancel
     /// Перепланировать под новое состояние. Если впереди границ нет
-    /// (`awaiting`/`finished`), веер сам вырождается в `.cancelNotifications`.
+    /// (`awaiting`/`finished`), веер вырождается в `.cancelNotifications`.
     case reschedule(now: Date)
   }
   
-  /// Канонический веер эффектов после перехода. Единственный источник правды
-  /// о составе и порядке эффектов.
+  /// Веер эффектов после перехода.
   ///
   /// Порядок: сначала записи (снапшот, история, календарь), затем уведомления,
   /// затем push-читатели (Live Activity, часы), и `reloadWidgets` — последним,
@@ -334,8 +358,6 @@ extension TimerCore {
       effects.append(.cancelNotifications)
     case .reschedule(let now):
       let boundaries = Schedule.boundaries(for: state, now: now)
-      // Пустой план — это «границ впереди нет», семантически отмена,
-      // а не перепланирование в никуда.
       effects.append(boundaries.isEmpty ? .cancelNotifications : .rescheduleNotifications(boundaries))
     }
     
@@ -354,7 +376,7 @@ private extension TimerCore {
   /// и расставляет якоря новой в зависимости от режима.
   ///
   /// - `.finished` — терминал: фаза не тикает, якорь не ставится.
-  /// - `autoStart == true` — новая фаза стартует немедленно (якорь = `now`).
+  /// - `autoStart == true` — новая фаза стартует  (якорь = `now`).
   /// - `autoStart == false` — уходим в `.awaiting(next:)` без якорей, ждём `start`.
   static func advance(_ state: TimerState, to nextPhase: Phase, now: Date, autoStart: Bool) -> TimerState {
     var newState = state

@@ -326,7 +326,7 @@ import Testing
     state.sessionTitle = "Эссе"
     state.workedIntervals = [DateInterval(start: Self.now, end: Self.now.addingTimeInterval(25))]
 
-    let (s, effects) = TimerCore.reduce(state, .restartCycle, context: ctx(Self.now))
+    let (s, effects) = TimerCore.reduce(state, .restartCycle(saveCurrent: false), context: ctx(Self.now))
 
     #expect(s.phase == .idle)
     #expect(s.completedIndices.isEmpty)
@@ -340,7 +340,7 @@ import Testing
   // Рестарт из середины цикла (идущей работы) тоже даёт чистый idle.
   @Test func restartCycleFromRunningWorkResets() {
     let state = running(start: Self.now)          // work(0) идёт
-    let (s, _) = TimerCore.reduce(state, .restartCycle, context: ctx(Self.now))
+    let (s, _) = TimerCore.reduce(state, .restartCycle(saveCurrent: false), context: ctx(Self.now))
     #expect(s.phase == .idle)
     #expect(s.currentIntervalStart == nil)
     #expect(s.completedIndices.isEmpty)
@@ -480,7 +480,7 @@ import Testing
   // restartCycle обнуляет cycleID — следующий start отчеканит новый.
   @Test func restartCycleClearsCycleID() {
     let (started, _) = TimerCore.reduce(idle, .start, context: ctx())
-    let (restarted, _) = TimerCore.reduce(started, .restartCycle, context: ctx())
+    let (restarted, _) = TimerCore.reduce(started, .restartCycle(saveCurrent: false), context: ctx())
     #expect(restarted.cycleID == nil)
   }
 

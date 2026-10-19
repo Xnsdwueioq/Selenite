@@ -110,7 +110,7 @@ struct TimerView: View {
   
   private var restartCycleButton: some View {
     Button {
-      Task { await timerEngine.send(.restartCycle) }
+      Task { await timerEngine.send(.restartCycle(saveCurrent: true)) } // TODO: Insert Action
     } label: {
       Image(systemName: "arrow.counterclockwise")
     }

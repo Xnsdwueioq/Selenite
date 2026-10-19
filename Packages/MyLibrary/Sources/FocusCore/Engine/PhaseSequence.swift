@@ -2,16 +2,10 @@
 // FocusCore
 // Created by Eyhciurmrn Zmpodackrl on 7/24/26.
 
-/// Топология цикла фаз: кто за кем следует.
-///
-/// Чистая навигация по графу `Phase` при данном `TimerConfig`. Зависит только от
-/// `Phase` и `TimerConfig` — не знает ни про якоря/интервалы, ни про события,
-/// ни про эффекты. Поэтому переиспользуется и редьюсером (`TimerCore`),
-/// и планировщиком (`Schedule`) без дублирования switch'а.
+/// Навигация по графу `Phase` при данном `TimerConfig`.
 enum PhaseSequence {
 
-  /// Следующая фаза после `phase`. Тотальна: для любого входа возвращает
-  /// корректную фазу (в т.ч. `.finished`), никогда не зацикливается.
+  /// Следующая фаза после `phase` без `awaiting`.
   static func next(after phase: Phase, config: TimerConfig) -> Phase {
     switch phase {
     case .work(let index):

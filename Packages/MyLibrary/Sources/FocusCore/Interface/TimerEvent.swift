@@ -8,7 +8,7 @@ public enum TimerEvent: Sendable, Equatable {
   case pause, resume
   case skipForward(saveCurrent: Bool)
   case skipBackward(saveCurrent: Bool)
-  case restartCycle
+  case restartCycle(saveCurrent: Bool)
   case boundaryReached
   case rename(String)
 }
