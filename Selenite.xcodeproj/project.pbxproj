@@ -30,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		B75C00A83087AD7200FF08EF /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
+		B75C00A93087B02100FF08EF /* FEATURES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FEATURES.md; sourceTree = "<group>"; };
 		B762D7632FFFB856007BAF01 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		B7F8AE522FFE9B1B00BCB769 /* Selenite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Selenite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7F8AE612FFE9B1C00BCB769 /* SeleniteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SeleniteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,6 +95,7 @@
 		B7F8AE492FFE9B1B00BCB769 = {
 			isa = PBXGroup;
 			children = (
+				B75C00A93087B02100FF08EF /* FEATURES.md */,
 				B75C00A83087AD7200FF08EF /* AGENTS.md */,
 				B72CD3F3301880F60005D214 /* SeleniteTests */,
 				B7F8AE862FFFA7BE00BCB769 /* Packages */,
